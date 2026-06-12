@@ -144,6 +144,7 @@ const THEMES=[
   {id:"green", hex:"#10b981", rgb:"16,185,129",  bg:"#011207", bgRgb:"1,18,7",    panel:"rgba(16,185,129,.09)"},
   {id:"rose",  hex:"#f43f5e", rgb:"244,63,94",   bg:"#0a0204", bgRgb:"10,2,4",    panel:"rgba(244,63,94,.09)"}
 ];
+const CLOUD_WEBHOOK="https://script.google.com/macros/s/AKfycbxKplFEBJSyJb_fXR_vL1IQGKAkfsLmSLu0fSuLIMOLDI4Bh_nmM220M7ZS3fPP-_o2/exec";
 const MEAT_RICE_INFO="Zinek potřebuje kyselé žaludeční prostředí, které spustí hlavně maso v porci Maso/Rýže. Sýr je kvůli vysokému vápníku kolizní: může zablokovat vstřebání zinku. Proto je potřeba myslet na budoucí sýr už při tomto jídle a nechat mezi Maso/Rýže a sýrem alespoň 2,5 hodiny odstup, aby zbyl čas kolizi včas vyřešit.";
 
 const WEEKS={
@@ -885,7 +886,9 @@ function renderCodex(content){
   const b1=btn("","💾 ZÁLOHA DAT (Export)",()=>{S.modal={type:"export",data:JSON.stringify({logs:S.logs,skips:S.skips,foodSwaps:S.foodSwaps})};render()});b1.style.cssText="width:100%;padding:12px;border-radius:10px;background:#0f172a;border:1px solid #1e293b;color:#94a3b8;font-size:11px;font-weight:900;margin-bottom:8px";
   const b2=btn("","📂 NAHRÁT ZÁLOHU (Import)",()=>{S.modal={type:"import",inputVal:""};render()});b2.style.cssText=b1.style.cssText;
   const b3=btn("","📋 KOPÍROVAT KÓD APP",()=>{S.modal={type:"appcode"};render()});b3.style.cssText=b1.style.cssText;
-  content.appendChild(b1);content.appendChild(b2);content.appendChild(b3);
+  const b4=btn("","☁️ CLOUD SYNC (Google Sheets)",()=>{S.modal={type:"cloudsync"};render()});
+  b4.style.cssText="width:100%;padding:12px;border-radius:10px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.35);color:#60a5fa;font-size:11px;font-weight:900;margin-bottom:8px";
+  content.appendChild(b1);content.appendChild(b2);content.appendChild(b3);content.appendChild(b4);
 }
 
 function renderModal(wrap,slots){
@@ -897,6 +900,99 @@ function renderModal(wrap,slots){
     box.appendChild(ttl);box.appendChild(msg);
     if(m.type==="alert"){const ok=btn("","Zavřít",()=>{S.modal=null;render()});ok.style.cssText="width:100%;padding:12px;border-radius:10px;font-size:11px;font-weight:900;color:#fff;background:#1e293b";box.appendChild(ok)}
     else{const row=div("");row.style.cssText="display:flex;gap:8px";const cancel=btn("","Zpět",()=>{S.modal=null;render()});const ok=btn("","✓ Potvrdit",()=>m.onOk());cancel.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";ok.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:900;color:#f87171;background:rgba(239,68,68,.15);border:1px solid #7f1d1d";row.appendChild(cancel);row.appendChild(ok);box.appendChild(row)}
+  // ── CLOUD SYNC modals ──
+  }else if(m.type==="cloudsync"){
+    const ttl=div("","☁️ CLOUD SYNC");ttl.style.cssText="font-size:15px;font-weight:700;color:#60a5fa;margin-bottom:6px;text-align:center";
+    const sub=div("","Google Sheets · Záloha dat Nutri OS");sub.style.cssText="font-size:10px;color:#475569;text-align:center;margin-bottom:18px;letter-spacing:.05em";
+    box.appendChild(ttl);box.appendChild(sub);
+    const btnData=btn("","📤 Odeslat zálohu dat",()=>{
+      S.modal={type:"cloud_sending",typ:"data",payload:JSON.stringify({logs:S.logs,skips:S.skips,foodSwaps:S.foodSwaps})};render();
+    });
+    btnData.style.cssText="width:100%;padding:13px;border-radius:12px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.35);color:#34d399;font-size:12px;font-weight:900;margin-bottom:10px";
+    const btnCode=btn("","📤 Odeslat kód aplikace",()=>{
+      S.modal={type:"cloud_sending",typ:"appcode",payload:"<!DOCTYPE html>\n"+document.documentElement.outerHTML};render();
+    });
+    btnCode.style.cssText="width:100%;padding:13px;border-radius:12px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.35);color:#c084fc;font-size:12px;font-weight:900;margin-bottom:10px";
+    const btnDown=btn("","📥 Stáhnout zálohu z cloudu",()=>{
+      S.modal={type:"cloud_loading"};render();
+    });
+    btnDown.style.cssText="width:100%;padding:13px;border-radius:12px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.35);color:#60a5fa;font-size:12px;font-weight:900;margin-bottom:14px";
+    const close=btn("","Zavřít",()=>{S.modal=null;render()});
+    close.style.cssText="width:100%;padding:11px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";
+    box.appendChild(btnData);box.appendChild(btnCode);box.appendChild(btnDown);box.appendChild(close);
+
+  }else if(m.type==="cloud_sending"){
+    const ttl=div("","📤 Odesílám do cloudu...");ttl.style.cssText="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:8px;text-align:center";
+    const status=div("","Připojuji se...");status.style.cssText="font-size:12px;color:#64748b;text-align:center;margin-bottom:20px;min-height:36px;line-height:1.6";
+    box.appendChild(ttl);box.appendChild(status);
+    const close=btn("","Zavřít",()=>{S.modal=null;render()});
+    close.style.cssText="width:100%;padding:11px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";
+    box.appendChild(close);
+    setTimeout(()=>{
+      fetch(CLOUD_WEBHOOK,{method:"POST",body:JSON.stringify({typ:m.typ,data:m.payload}),headers:{"Content-Type":"application/json"}})
+        .then(r=>r.json())
+        .then(r=>{
+          if(r.ok){status.textContent="✅ Odesláno! sync_id: "+r.sync_id;status.style.color="#34d399"}
+          else{status.textContent="⚠️ Chyba: "+r.error;status.style.color="#f87171"}
+        })
+        .catch(e=>{status.textContent="⚠️ Chyba připojení: "+e.message;status.style.color="#f87171"});
+    },100);
+
+  }else if(m.type==="cloud_loading"){
+    const ttl=div("","📥 Zálohy v cloudu");ttl.style.cssText="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:8px;text-align:center";
+    const status=div("","Načítám seznam...");status.style.cssText="font-size:12px;color:#64748b;text-align:center;margin-bottom:10px";
+    const list=div("");list.style.cssText="max-height:220px;overflow-y:auto;margin-bottom:12px";
+    box.appendChild(ttl);box.appendChild(status);box.appendChild(list);
+    const close=btn("","Zavřít",()=>{S.modal=null;render()});
+    close.style.cssText="width:100%;padding:11px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";
+    box.appendChild(close);
+    setTimeout(()=>{
+      fetch(CLOUD_WEBHOOK)
+        .then(r=>r.json())
+        .then(r=>{
+          if(!r.ok){status.textContent="⚠️ Chyba: "+r.error;status.style.color="#f87171";return}
+          if(!r.zalohy.length){status.textContent="Žádné zálohy v cloudu.";return}
+          status.textContent="Vyber zálohu k načtení:";
+          r.zalohy.forEach(z=>{
+            const row=btn("",`#${z.sync_id} · ${z.typ==="data"?"📊 Data":"📋 Kód"} · ${z.datum}`,()=>{
+              S.modal={type:"cloud_download",sync_id:z.sync_id,typ:z.typ,datum:z.datum};render();
+            });
+            row.style.cssText="display:block;width:100%;text-align:left;padding:10px 12px;border-radius:9px;background:#0f172a;border:1px solid #1e293b;color:#94a3b8;font-size:11px;font-weight:700;margin-bottom:6px";
+            list.appendChild(row);
+          });
+        })
+        .catch(e=>{status.textContent="⚠️ Chyba připojení: "+e.message;status.style.color="#f87171"});
+    },100);
+
+  }else if(m.type==="cloud_download"){
+    const ttl=div("",`📥 Načíst zálohu #${m.sync_id}`);ttl.style.cssText="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px;text-align:center";
+    const sub=div("",m.datum+" · "+(m.typ==="data"?"Data protokolu":"Kód aplikace"));sub.style.cssText="font-size:11px;color:#64748b;text-align:center;margin-bottom:8px";
+    const warn=div("",m.typ==="data"?"⚠️ Přepíše aktuální záznamy dne.":"⚠️ Kód aplikace — pouze pro zálohu, nelze importovat přes appku.");
+    warn.style.cssText="font-size:11px;color:#fbbf24;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);padding:8px 10px;border-radius:8px;margin-bottom:14px;text-align:center";
+    const status=div("");status.style.cssText="font-size:12px;color:#64748b;text-align:center;margin-bottom:12px;min-height:20px";
+    box.appendChild(ttl);box.appendChild(sub);box.appendChild(warn);box.appendChild(status);
+    if(m.typ==="data"){
+      const ok=btn("","✓ Načíst a importovat",()=>{
+        status.textContent="Stahuji...";status.style.color="#64748b";
+        fetch(CLOUD_WEBHOOK+"?sync_id="+m.sync_id)
+          .then(r=>r.json())
+          .then(r=>{
+            if(!r.ok){status.textContent="⚠️ "+r.error;status.style.color="#f87171";return}
+            try{
+              const p=JSON.parse(r.data);
+              S.logs=p.logs||{};S.skips=p.skips||{};S.foodSwaps=p.foodSwaps||{};
+              save();status.textContent="✅ Importováno!";status.style.color="#34d399";
+              setTimeout(()=>{S.modal=null;render()},1200);
+            }catch(e){status.textContent="⚠️ Neplatný formát dat";status.style.color="#f87171"}
+          })
+          .catch(e=>{status.textContent="⚠️ Chyba: "+e.message;status.style.color="#f87171"});
+      });
+      ok.style.cssText="width:100%;padding:13px;border-radius:12px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);color:#34d399;font-size:12px;font-weight:900;margin-bottom:8px";
+      box.appendChild(ok);
+    }
+    const back=btn("","Zpět",()=>{S.modal={type:"cloud_loading"};render()});
+    back.style.cssText="width:100%;padding:11px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";
+    box.appendChild(back);
   // ── PATCHED: foodskip modal ──
   }else if(m.type==="foodskip"){
     const ttl=div("","Vynechané jídlo");ttl.style.cssText="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:8px;text-align:center";
