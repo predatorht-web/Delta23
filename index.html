@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="cs" style="--p: 59,130,246; --intensity: 0.18; --accent: #3b82f6; --accent-alpha: #3b82f644;"><head><script>(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjcxNmI5NDI0NGEwYzk3YjE5ZTA1YzM3NTU4ZTA2Y2ZhNTBlNDg2NTEiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxMDMzODM3Mzg0NjU3Mzg3MTEwNyIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiI4YjhmNzkwOTc1MmQtaW5kZXguaHRtbC01MyJ9LCJleHAiOjE3ODEyMTIwOTEsImlhdCI6MTc4MTIwODQ5MSwiYWxnIjoiUlMyNTYifQ.cH0O5_E2sMTAhDNR3niIIN2C-qqAEwHVHKPuoPhnnIOGbc_bzOChqcI6bmrjfi7-v2N_9u0JqXwEAW2JYfpmB2Artmj-CpDMhmow67XBfzUBVmgCejljAGHsydrChY5MbdqALatlCf3Z6kS_pi_gxC1ta_Z_TKvE69Yk86hp1pxEkD-s09Exv0Wus-VU7u17zXV3EicDwDmImMwrWgskBtjmU6ZT6QT_4MpFqdA0HongDBdCkVckApxJ3QtWDE5dubRirWxLnK0ILJ-bqo_1g-MQOAJsknBXSmfYplH49YZb9-Xcwxs2NXSIn2OQqtyIvlh9xj61AJbAvtdJlyImqw","8b8f7909752d-index.html-53")</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>NUTRI OS · ZION</title>
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22NUTRI+OS%22%2C%22short_name%22%3A%22NUTRI+OS%22%2C%22description%22%3A%22Z%C3%ADON+supplement+%26+food+tracker%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg+xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'+viewBox%3D'0+0+512+512'%253E%253Crect+width%3D'512'+height%3D'512'+rx%3D'80'+fill%3D'%2523000'%2F%253E%253Ccircle+cx%3D'256'+cy%3D'256'+r%3D'140'+fill%3D'none'+stroke%3D'%25233b82f6'+stroke-width%3D'28'%2F%253E%253Ccircle+cx%3D'256'+cy%3D'256'+r%3D'40'+fill%3D'%25233b82f6'%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any+maskable%22%7D%5D%7D">
+<script>
+if('serviceWorker' in navigator){
+  const sw=`self.addEventListener('install',e=>e.waitUntil(caches.open('nos-v54').then(c=>c.addAll([location.pathname]))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+  const blob=new Blob([sw],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob),{scope:'./'}).catch(()=>{});
+}
+</script>
+<style>
+:root {
+  --p: 59, 130, 246;
+  --bg: 0, 0, 0;
+  --intensity: 0.15;
+  --accent: #10b981;
+  --accent-alpha: #10b98144;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { min-height: 100%; overscroll-behavior-y: none; background: #000; color: #f0f0f0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 14px; }
+button { cursor: pointer; border: none; background: transparent; font-family: inherit; transition: transform .1s, opacity .18s; }
+button:active { transform: scale(.94); }
+textarea, input { font-family: inherit; }
+::-webkit-scrollbar { display: none; }
+body::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); background-size: 200px; }
+body::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 80% 40% at 50% 0%, rgba(var(--p), 0.06) 0%, transparent 70%), radial-gradient(ellipse 50% 30% at 80% 100%, rgba(var(--p), 0.04) 0%, transparent 60%); transition: background 1s ease; }
+#app { position: relative; z-index: 1; }
+.g { background: rgba(0,0,0,0.42); backdrop-filter: blur(32px) saturate(180%) brightness(1.05); -webkit-backdrop-filter: blur(32px) saturate(180%) brightness(1.05); border-top: 1px solid rgba(255,255,255,0.18); border-left: 1px solid rgba(255,255,255,0.10); border-bottom: 1px solid rgba(255,255,255,0.04); border-right: 1px solid rgba(255,255,255,0.04); box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.09); background-image: linear-gradient(145deg, rgba(255,255,255,0.07) 0%, transparent 50%); }
+.zion-engine { padding: 16px 16px 12px; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+.zion-palette { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.zion-dot { width: 26px; height: 26px; border-radius: 50%; background: var(--dot-color); border: 2px solid rgba(255,255,255,0.15); cursor: pointer; position: relative; transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .18s; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+.zion-dot::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid var(--dot-color); opacity: 0; transform: scale(0.5); transition: opacity .2s, transform .22s cubic-bezier(.34,1.56,.64,1); }
+.zion-dot.active { transform: scale(1.35); border-color: rgba(255,255,255,0.85); box-shadow: 0 0 0 3px rgba(255,255,255,0.12), 0 0 18px var(--dot-color), 0 4px 14px rgba(0,0,0,0.6); }
+.zion-dot.active::after { opacity: 0.7; transform: scale(1); }
+.zion-tune { display: flex; align-items: center; gap: 14px; background: rgba(0,0,0,0.5); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.12); border-left: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.02); border-right: 1px solid rgba(255,255,255,0.02); border-radius: 14px; padding: 10px 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+.zion-tune-label { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; min-width: 80px; }
+.zion-tune-label span:first-child { font-size: 8px; font-weight: 900; letter-spacing: .14em; color: rgba(255,255,255,0.35); text-transform: uppercase; }
+.zion-tune-val { font-size: 22px; font-weight: 900; letter-spacing: -.03em; line-height: 1; color: rgb(var(--p)); text-shadow: 0 0 20px rgba(var(--p),0.6); }
+.zion-slider { flex: 1; -webkit-appearance: none; appearance: none; height: 3px; border-radius: 99px; outline: none; cursor: pointer; background: linear-gradient(to right, rgb(var(--p)) var(--pct, 26%), rgba(255,255,255,0.12) var(--pct, 26%)); }
+.zion-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: rgb(var(--p)); border: 2.5px solid rgba(255,255,255,0.9); box-shadow: 0 0 0 3px rgba(var(--p),0.25), 0 0 16px rgba(var(--p),0.7), 0 2px 8px rgba(0,0,0,0.5); cursor: pointer; transition: transform .12s; }
+.zion-slider::-webkit-slider-thumb:active { transform: scale(1.25); }
+#time-big { font-size: 56px; font-weight: 900; line-height: 1; letter-spacing: -.05em; color: rgb(var(--p)); text-shadow: 0 0 40px rgba(var(--p),0.5), 0 0 80px rgba(var(--p),0.2); display: block; }
+.week-btn { flex: 1; padding: 8px 4px; font-size: 10px; font-weight: 900; letter-spacing: .06em; border-radius: 10px; color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); transition: all .18s; }
+.week-btn.active { color: #fff; background: rgba(var(--p), 0.18); border-color: rgba(var(--p), 0.5); box-shadow: 0 0 12px rgba(var(--p),0.2), inset 0 0 8px rgba(var(--p),0.08); }
+.tab-bar-wrap { background: rgba(0,0,0,0.5); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0 12px; margin: 12px auto 0; max-width: 480px; border-radius: 18px; box-shadow: 0 -2px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06); }
+.tab-btn { flex: 1; min-width: 76px; padding: 13px 6px; font-size: 11px; font-weight: 900; letter-spacing: .06em; color: rgba(255,255,255,0.28); border-radius: 12px; background: transparent; border: 1px solid transparent; transition: all .18s; }
+.tab-btn.active { color: rgba(255,255,255,0.95); background: rgba(var(--p), 0.18); border-color: rgba(var(--p), 0.4); box-shadow: 0 0 16px rgba(var(--p),0.2), inset 0 0 12px rgba(var(--p),0.08); text-shadow: 0 0 12px rgba(var(--p),0.5); }
+.zion-node-card { background: rgba(0,0,0,0.45); backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%); border-top: 1px solid rgba(255,255,255,0.14); border-left: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.03); border-radius: 18px; padding: 14px; margin-bottom: 10px; box-shadow: 0 8px 28px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06); background-image: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, transparent 55%); transition: box-shadow .2s; }
+.zion-node-card.zion-active { background: rgba(var(--p), calc(var(--intensity) * 1.1)); background-image: linear-gradient(145deg, rgba(var(--p),0.25) 0%, rgba(var(--p),0.05) 60%, transparent 100%); backdrop-filter: blur(32px) saturate(200%); -webkit-backdrop-filter: blur(32px) saturate(200%); border-top: 1px solid rgba(var(--p), 0.5); border-left: 1px solid rgba(var(--p), 0.3); border-bottom: 1px solid rgba(var(--p), 0.08); border-right: 1px solid rgba(var(--p), 0.08); box-shadow: 0 0 0 1px rgba(var(--p), 0.2), 0 8px 32px rgba(var(--p), 0.18), 0 0 60px rgba(var(--p), 0.08), inset 0 1px 0 rgba(255,255,255,0.1); }
+.zion-node-card.zion-missed { background: rgba(239,68,68,0.18); background-image: linear-gradient(145deg, rgba(239,68,68,0.2) 0%, transparent 55%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(239,68,68,0.38); border-left: 1px solid rgba(239,68,68,0.22); border-bottom: 1px solid rgba(239,68,68,0.05); border-right: 1px solid rgba(239,68,68,0.05); box-shadow: 0 0 0 1px rgba(239,68,68,0.15), 0 6px 24px rgba(239,68,68,0.15); }
+.zion-food-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 13px; border-radius: 14px; margin-bottom: 7px; background: rgba(0,0,0,0.42); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.12); border-left: 1px solid rgba(255,255,255,0.07); border-bottom: 1px solid rgba(255,255,255,0.02); border-right: 1px solid rgba(255,255,255,0.02); box-shadow: 0 4px 14px rgba(0,0,0,0.3); background-image: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%); }
+.zion-supply-card { border-radius: 20px; padding: 15px; margin-bottom: 13px; background: rgba(0,0,0,0.5); backdrop-filter: blur(32px) saturate(160%); -webkit-backdrop-filter: blur(32px) saturate(160%); border-top: 1px solid rgba(255,255,255,0.16); border-left: 1px solid rgba(255,255,255,0.10); border-bottom: 1px solid rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.03); box-shadow: 0 8px 28px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06); background-image: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 48%); }
+.zion-dose-row { display: grid; grid-template-columns: minmax(56px,1fr) auto auto; align-items: center; gap: 8px; margin-top: 9px; padding: 10px 11px; border-radius: 10px; background: rgba(0,0,0,0.35); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.07); }
+.modal-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.zion-modal-box { background: rgba(5,5,10,0.85); backdrop-filter: blur(48px) saturate(180%); -webkit-backdrop-filter: blur(48px) saturate(180%); border-top: 1px solid rgba(255,255,255,0.2); border-left: 1px solid rgba(255,255,255,0.12); border-bottom: 1px solid rgba(255,255,255,0.04); border-right: 1px solid rgba(255,255,255,0.04); border-radius: 24px; padding: 22px; width: 100%; max-width: 320px; box-shadow: 0 32px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.06); background-image: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, transparent 45%); }
+.zion-lock-panel { background: rgba(239,68,68,0.15); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(239,68,68,0.4); border-left: 1px solid rgba(239,68,68,0.25); border-bottom: 1px solid rgba(239,68,68,0.06); border-right: 1px solid rgba(239,68,68,0.06); border-radius: 14px; padding: 12px; margin-bottom: 13px; box-shadow: 0 4px 20px rgba(239,68,68,0.15), inset 0 1px 0 rgba(255,255,255,0.05); animation: pulse 2s infinite; background-image: linear-gradient(135deg, rgba(239,68,68,0.12) 0%, transparent 55%); }
+.zion-codex-card { border-radius: 20px; padding: 20px; margin-bottom: 12px; border-top: 1px solid var(--codex-border); border-left: 1px solid var(--codex-border); border-bottom: 1px solid transparent; border-right: 1px solid transparent; background: var(--codex-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05); background-image: linear-gradient(145deg, rgba(255,255,255,0.04) 0%, transparent 50%); }
+.zion-day-window { background: rgba(0,0,0,0.42); backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%); border-top: 1px solid rgba(255,255,255,0.14); border-left: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.02); border-right: 1px solid rgba(255,255,255,0.02); border-radius: 16px; padding: 13px 13px 11px; box-shadow: 0 6px 18px rgba(0,0,0,0.35); background-image: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, transparent 52%); }
+.day-node.active .zion-day-window { background: rgba(var(--p), calc(var(--intensity) * 0.9)); background-image: linear-gradient(145deg, rgba(var(--p),0.3) 0%, rgba(var(--p),0.05) 55%, transparent 100%); border-top-color: rgba(var(--p), 0.5); border-left-color: rgba(var(--p), 0.3); border-bottom-color: rgba(var(--p), 0.06); border-right-color: rgba(var(--p), 0.06); box-shadow: 0 0 0 1px rgba(var(--p),0.22), 0 8px 30px rgba(var(--p),0.15), 0 0 50px rgba(var(--p),0.07); }
+.zion-alert-box { border-radius: 11px; padding: 9px 13px; margin-bottom: 8px; font-size: 11px; line-height: 1.5; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.zion-why-text { font-size: 11px; color: rgba(255,255,255,0.45); border-left: 2px solid rgba(var(--p),0.35); padding: 8px 0 8px 10px; margin-top: 6px; line-height: 1.65; }
+.app-version { text-align: center; font-size: 9px; font-weight: 900; letter-spacing: .15em; color: rgba(255,255,255,0.2); padding: 12px 0 4px; text-transform: uppercase; }
+.kcal-display { font-size: 28px; font-weight: 900; color: #f43f5e; }
+.bar-bg { background: rgba(255,255,255,0.07); border-radius: 99px; height: 5px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; transition: width .5s ease; }
+.lock-text { font-size: 11px; color: #fca5a5; font-weight: 700; }
+.supl-btn { font-size: 10px; font-weight: 900; padding: 6px 11px; border-radius: 8px; border: 1px solid currentColor; letter-spacing: .04em; }
+.done-btn { font-size: 10px; font-weight: 700; padding: 6px 11px; border-radius: 8px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.09); }
+.branch-btn { flex: 1; padding: 11px; border-radius: 12px; font-size: 11px; font-weight: 900; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; gap: 6px; backdrop-filter: blur(12px); }
+.ghost { opacity: 1; }
+.missed-badge, .cur-badge { font-size: 10px; font-weight: 900; letter-spacing: .1em; margin-bottom: 6px; }
+.missed-badge { color: #ef4444; }
+.why-btn { font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 900; letter-spacing: .05em; margin-top: 10px; }
+.timeline-line { position: absolute; left: 14px; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.06); }
+.timeline-dot { position: absolute; left: 9px; width: 11px; height: 11px; border-radius: 50%; background: rgb(var(--p)); border: 2px solid #000; box-shadow: 0 0 0 2px rgba(var(--p),0.3), 0 0 10px rgba(var(--p),0.5); }
+.supply-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+.supply-name { font-size: 21px; font-weight: 900; letter-spacing: .02em; }
+.supply-count { font-size: 17px; font-weight: 900; color: rgba(255,255,255,0.5); white-space: nowrap; }
+.dose-time { font-size: 15px; font-weight: 900; color: rgba(255,255,255,0.5); }
+.dose-action { padding: 7px 11px; border-radius: 8px; font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); }
+.dose-action.done { background: rgba(4,120,87,0.5); color: #bbf7d0; border-color: rgba(5,150,105,0.45); }
+.dose-action.manual { background: rgba(88,28,135,0.5); color: #f0abfc; border-color: rgba(168,85,247,0.4); }
+.dose-action.skip { background: rgba(63,29,36,0.8); color: #fb7185; border-color: rgba(127,29,29,0.4); }
+.dose-action.muted { opacity: .38; }
+.reset-danger { width: 100%; padding: 13px; border-radius: 14px; border: 1px solid rgba(127,29,29,0.45); background: rgba(127,29,29,0.12); color: #f87171; font-size: 12px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; margin-top: 14px; }
+.codex-title { font-size: 17px; font-weight: 900; letter-spacing: .1em; color: var(--codex-color); margin-bottom: 14px; }
+.codex-text { font-size: 13px; font-weight: 700; color: rgba(200,210,220,0.85); line-height: 1.75; }
+.day-track { position: absolute; left: 14px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, rgba(var(--p),.06), rgba(var(--p),.3), rgba(var(--p),.06)); border-radius: 999px; }
+.day-track-ideal { position: absolute; left: 28px; top: 0; bottom: 0; width: 1px; background: rgba(245,158,11,.25); box-shadow: 0 0 6px rgba(245,158,11,.12); }
+.day-live-dot { position: absolute; left: 6px; width: 18px; height: 18px; border-radius: 50%; background: rgb(var(--p)); border: 3px solid #000; box-shadow: 0 0 0 4px rgba(var(--p),.15), 0 0 24px rgba(var(--p),0.7), 0 0 48px rgba(var(--p),.2); transform: translateY(-50%); z-index: 5; transition: top .4s ease; }
+.day-node { position: relative; padding-left: 46px; margin-bottom: 16px; }
+.day-node-dot { position: absolute; left: 10px; top: 22px; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,0.12); z-index: 2; }
+.day-tick { position: absolute; left: 24px; top: 26px; width: 9px; height: 2px; background: #f59e0b; border-radius: 99px; box-shadow: 0 0 6px rgba(245,158,11,.45); z-index: 2; }
+.day-node.done .day-node-dot { background: #22c55e; border-color: rgba(34,197,94,.6); box-shadow: 0 0 10px rgba(34,197,94,.5); }
+.day-node.active .day-node-dot { background: rgb(var(--p)); border-color: rgba(var(--p),.7); box-shadow: 0 0 14px rgba(var(--p),.7); }
+.day-node-time { font-size: 25px; font-weight: 900; letter-spacing: -.04em; margin-bottom: 5px; }
+.day-node-label { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.85); line-height: 1.35; }
+.day-node-sub { font-size: 10px; font-weight: 900; letter-spacing: .08em; color: rgba(255,255,255,0.3); margin-top: 5px; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+@media(max-width:390px){
+  .tab-btn{min-width:70px;font-size:10px;padding:11px 4px}
+  .supply-name{font-size:18px} .supply-count{font-size:13px}
+  .zion-dose-row{grid-template-columns:1fr auto;gap:6px}
+  .dose-time{grid-row:1/span 2} .dose-action{padding:6px 7px}
+}
+.zion-dock { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; padding: 0 12px env(safe-area-inset-bottom, 8px); }
+.zion-dock-inner { display: flex; gap: 4px; max-width: 480px; margin: 0 auto; background: rgba(0,0,0,0.65); backdrop-filter: blur(40px) saturate(200%) brightness(1.1); -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.1); border-top: 1px solid rgba(255,255,255,0.14); border-left: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.03); border-radius: 22px; padding: 6px; margin-bottom: 8px; box-shadow: 0 -2px 24px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08); overflow-x: auto; }
+#app > div { min-height: 100vh; }
+.zion-dock-inner .tab-btn { flex: 1; min-width: 68px; padding: 11px 6px; font-size: 11px; font-weight: 900; letter-spacing: .05em; color: rgba(255,255,255,0.28); border-radius: 16px; background: transparent; border: 1px solid transparent; transition: all .18s; white-space: nowrap; }
+.zion-dock-inner .tab-btn.active { color: rgba(255,255,255,0.95); background: rgba(var(--p), 0.22); border-color: rgba(var(--p), 0.45); box-shadow: 0 0 18px rgba(var(--p),0.25), inset 0 0 14px rgba(var(--p),0.1), inset 0 1px 0 rgba(255,255,255,0.08); text-shadow: 0 0 14px rgba(var(--p),0.55); }
+.info-node .zion-node-card { padding: 10px 13px; background: rgba(0,0,0,0.45); backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%); border-top: 1px solid rgba(255,255,255,0.14); border-left: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.03); box-shadow: 0 8px 28px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06); }
+.info-node .zion-node-card h3 { font-size: 13px !important; color: rgba(255,255,255,0.45) !important; }
+.info-node .zion-node-card .zion-node-time-label { color: rgba(255,255,255,0.25) !important; }
+.sim-banner { background: #f59e0b; color: #000; text-align: center; font-size: 11px; font-weight: 900; letter-spacing: .1em; padding: 6px 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
+.sim-ctrl-row { display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 8px; }
+.sim-input { background: rgba(0,0,0,0.5); border: 1px solid rgba(245,158,11,0.5); color: #f1f5f9; padding: 8px 12px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 700; color-scheme: dark; outline: none; }
+.sim-reset { background: rgba(127,29,29,0.2); border: 1px solid rgba(239,68,68,0.4); color: #f87171; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 900; cursor: pointer; transition: transform .1s; }
+.sim-reset:active { transform: scale(.9); }
+</style>
+</head>
+<body style="background: rgb(0, 0, 0);">
+<div id="app"></div>
+<script>
+"use strict";
+const SUPL_COLORS={"Taurin":"#f97316","Ca+Mg+Zn":"#3b82f6","D3+K2":"#eab308","Mg+B6":"#22c55e"};
+const APP_VERSION="NUTRI OS V5.4";
+const TAURIN_FAST_MIN=45,CALCIUM_LOCK_MIN=150,WHEY_LOCK_MIN=45,MEAT_TO_CHEESE_MIN=90,MEAT_TO_EMPTY_SUPL_MIN=120;
+const THEMES=[
+  {id:"blue",  hex:"#3b82f6", rgb:"59,130,246",  bg:"#030712", bgRgb:"3,7,18",    panel:"rgba(59,130,246,.09)"},
+  {id:"amber", hex:"#f59e0b", rgb:"245,158,11",  bg:"#070401", bgRgb:"7,4,1",     panel:"rgba(245,158,11,.09)"},
+  {id:"red",   hex:"#ef4444", rgb:"239,68,68",   bg:"#0a0303", bgRgb:"10,3,3",    panel:"rgba(239,68,68,.09)"},
+  {id:"purple",hex:"#a855f7", rgb:"168,85,247",  bg:"#06030c", bgRgb:"6,3,12",    panel:"rgba(168,85,247,.09)"},
+  {id:"green", hex:"#10b981", rgb:"16,185,129",  bg:"#011207", bgRgb:"1,18,7",    panel:"rgba(16,185,129,.09)"},
+  {id:"rose",  hex:"#f43f5e", rgb:"244,63,94",   bg:"#0a0204", bgRgb:"10,2,4",    panel:"rgba(244,63,94,.09)"}
+];
+const MEAT_RICE_INFO="Zinek potřebuje kyselé žaludeční prostředí, které spustí hlavně maso v porci Maso/Rýže. Sýr je kvůli vysokému vápníku kolizní: může zablokovat vstřebání zinku. Proto je potřeba myslet na budoucí sýr už při tomto jídle a nechat mezi Maso/Rýže a sýrem alespoň 2,5 hodiny odstup, aby zbyl čas kolizi včas vyřešit.";
+
+const WEEKS={
+  A:{label:"NOČNÍ SMĚNA",emoji:"🟦",resetTime:"00:00",schedule:[
+    {id:"A_WORK_2",       timeStart:"00:00",timeEnd:"06:00", label:"PRÁCE (Půst pokračuje)", type:"work",  tags:["ANCHOR"],supls:[],foods:[]},
+    {id:"A_TRANSIT_HOME", timeStart:"06:00",timeEnd:"06:20", label:"Cesta domů",           type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"A_TAUR_AM",      timeStart:"06:20",timeEnd:"07:00", label:"Mg+B6 + Taurin",        type:"supl",  tags:["FLEX"],  supls:[{name:"Mg+B6",qty:2},{name:"Taurin",qty:2}],foods:[],reqAcid:true, why:"Hořčík a Taurin jedou nejčistěji nalačno. První jídlo nech alespoň 45 minut po zapsaném čase."},
+    {id:"A_CHEESE_1",     timeStart:"07:00",timeEnd:"08:00", label:"Sýr I.",                type:"food",  tags:["FLEX"],  supls:[],foods:[{name:"Eidam 40% 100g",kcal:313}],applyCalcium:true, why:"Ranní sýr patří až po taurinu nalačno. Appka hlídá 45 minut od skutečně zapsaného času Taurinu."},
+    {id:"A_SLEEP",        timeStart:"08:00",timeEnd:"14:00", label:"Spánek",                type:"sleep", tags:["ANCHOR"],supls:[],foods:[]},
+    {id:"A_WAKE",         timeStart:"14:00",timeEnd:"15:00", label:"Budíček + Taurin",       type:"supl",  tags:["FLEX"],  supls:[{name:"Taurin",qty:2}],foods:[], why:"Odpolední Taurin spustí blok a nechává 45 minut před Maso/Rýže."},
+    {id:"A_MEAT_1",       timeStart:"15:00",timeEnd:"16:00", label:"Maso / Rýže 1/2",       type:"food",  tags:["FLEX"],  supls:[{name:"Ca+Mg+Zn",qty:1}],foods:[{name:"Maso/rýže 1/2",kcal:518}],reqAcid:true,why:MEAT_RICE_INFO},
+    {id:"A_MEAT_2",       timeStart:"16:00",timeEnd:"17:30", label:"Maso / Rýže 2/2",       type:"food",  tags:["FLEX"],  supls:[],foods:[{name:"Maso/rýže 2/2",kcal:518}],reqAcid:true,why:MEAT_RICE_INFO},
+    {id:"A_SWAP_EVE",     timeStart:"17:30",timeEnd:"20:00", label:"Sýr + D3 (okno)",       type:"food",  tags:["SWAP"],  supls:[{name:"D3+K2",qty:1}],foods:[{name:"Eidam 40% 90g",kcal:282},{name:"Slunečnice 40g",kcal:254,swappable:true,swapWith:{name:"Eidam 40% 100g",kcal:313}}],applyCalcium:true, why:"Fast-track okno. Sýr s D3+K2 může přijít 60-90 min po Maso/Rýže."},
+    {id:"A_FAST_START",   timeStart:"20:00",timeEnd:"20:30", label:"Káva + Cigareta (Start půstu)",type:"info",tags:["INFO"],supls:[],foods:[]},
+    {id:"A_PREP",         timeStart:"20:30",timeEnd:"21:20", label:"Příprava na směnu",      type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"A_TRANSIT_WORK", timeStart:"21:20",timeEnd:"22:00", label:"Odchod a Přesun",        type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"A_WORK_1",       timeStart:"22:00",timeEnd:"00:00", label:"PRÁCE (Začátek)",        type:"work",  tags:["ANCHOR"],supls:[],foods:[]}
+  ]},
+  B:{label:"ODPOLEDNÍ SMĚNA",emoji:"🟧",resetTime:"02:00",schedule:[
+    {id:"B_SLEEP_2",      timeStart:"02:00",timeEnd:"10:00", label:"Spánek (Pokračování)",   type:"sleep", tags:["ANCHOR"],supls:[],foods:[]},
+    {id:"B_WAKE",         timeStart:"10:00",timeEnd:"10:30", label:"Budíček + Taurin",       type:"supl",  tags:["FLEX"],  supls:[{name:"Taurin",qty:2}],foods:[]},
+    {id:"B_SWAP_MORN",    timeStart:"10:30",timeEnd:"11:30", label:"Maso / Rýže 1/2",       type:"food",  tags:["SWAP"],  supls:[{name:"Ca+Mg+Zn",qty:1}],foods:[{name:"Maso/rýže 1/2",kcal:518}],reqAcid:true,why:MEAT_RICE_INFO},
+    {id:"B_FAST_START",   timeStart:"11:30",timeEnd:"12:30", label:"Káva + Cigareta",        type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"B_PREP_TRANSIT", timeStart:"12:30",timeEnd:"14:00", label:"Příprava a Přesun",      type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"B_WORK_1",       timeStart:"14:00",timeEnd:"18:00", label:"Práce I.",               type:"work",  tags:["ANCHOR"],supls:[],foods:[]},
+    {id:"B_LUNCH",        timeStart:"18:00",timeEnd:"18:30", label:"Oběd v práci",           type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"B_WORK_2",       timeStart:"18:30",timeEnd:"22:00", label:"Práce II.",              type:"work",  tags:["ANCHOR"],supls:[],foods:[]},
+    {id:"B_TRANSIT_HOME", timeStart:"22:00",timeEnd:"22:30", label:"Cesta z práce",          type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"B_MEAT_2",       timeStart:"22:30",timeEnd:"23:00", label:"Maso / Rýže 2/2",       type:"food",  tags:["FLEX"],  supls:[{name:"Mg+B6",qty:2}],foods:[{name:"Maso/rýže 2/2",kcal:518}],reqAcid:true,why:MEAT_RICE_INFO},
+    {id:"B_COFFEE_NIGHT", timeStart:"23:00",timeEnd:"00:30", label:"Káva + Cigareta",        type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"B_SWAP_NIGHT",   timeStart:"00:30",timeEnd:"01:00", label:"Sýr + Slunečnice",       type:"food",  tags:["SWAP"],  supls:[{name:"D3+K2",qty:1}],foods:[{name:"Eidam 40% 90g",kcal:282},{name:"Slunečnice 40g",kcal:254,swappable:true,swapWith:{name:"Eidam 40% 100g",kcal:313}}],applyCalcium:true},
+    {id:"B_PRE_SLEEP",    timeStart:"01:00",timeEnd:"01:30", label:"Před spaním + Taurin",   type:"supl",  tags:["FLEX"],  supls:[{name:"Taurin",qty:2}],foods:[]},
+    {id:"B_SLEEP_1",      timeStart:"01:30",timeEnd:"02:00", label:"Spánek (Začátek)",       type:"sleep", tags:["ANCHOR"],supls:[],foods:[]}
+  ]},
+  C:{label:"RANNÍ SMĚNA",emoji:"🟥",resetTime:"02:00",schedule:[
+    {id:"C_SLEEP_2",      timeStart:"02:00",timeEnd:"04:30", label:"Spánek (Pokračování)",   type:"sleep", tags:["ANCHOR"],supls:[],foods:[]},
+    {id:"C_WAKE",         timeStart:"04:30",timeEnd:"04:50", label:"Budíček (Zóna smrti)",   type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"C_TAUR_AM",      timeStart:"04:50",timeEnd:"05:25", label:"Taurin",                 type:"supl",  tags:["FLEX"],  supls:[{name:"Taurin",qty:2}],foods:[], why:"Taurin nalačno — nechá 45 minut před jídlem."},
+    {id:"C_TRANSIT_WORK", timeStart:"05:25",timeEnd:"06:00", label:"Přesun do práce",        type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"C_WORK_1",       timeStart:"06:00",timeEnd:"12:00", label:"Práce (Death Zone)",     type:"work",  tags:["ANCHOR"],supls:[],foods:[]},
+    {id:"C_LUNCH",        timeStart:"12:00",timeEnd:"12:30", label:"Oběd v práci",           type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"C_WORK_2",       timeStart:"12:30",timeEnd:"14:00", label:"Práce",                  type:"work",  tags:["ANCHOR"],supls:[],foods:[]},
+    {id:"C_TRANSIT_HOME", timeStart:"14:00",timeEnd:"14:30", label:"Cesta domů",             type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"C_MEAT_1",       timeStart:"14:30",timeEnd:"15:30", label:"Maso / Rýže 1/2",       type:"food",  tags:["FLEX"],  supls:[{name:"Ca+Mg+Zn",qty:1}],foods:[{name:"Maso/rýže 1/2",kcal:518}],reqAcid:true,why:MEAT_RICE_INFO},
+    {id:"C_MEAT_2",       timeStart:"15:30",timeEnd:"16:00", label:"Maso / Rýže 2/2",       type:"food",  tags:["FLEX"],  supls:[],foods:[{name:"Maso/rýže 2/2",kcal:518}],reqAcid:true,why:MEAT_RICE_INFO},
+    {id:"C_SHUTDOWN",     timeStart:"16:00",timeEnd:"20:00", label:"SHUTDOWN (Spánek)",      type:"sleep", tags:["SOFT_ANCHOR"],supls:[],foods:[]},
+    {id:"C_SWAP_EVE",     timeStart:"20:00",timeEnd:"22:30", label:"Sýr + Slunečnice",       type:"food",  tags:["SWAP"],  supls:[{name:"D3+K2",qty:1}],foods:[{name:"Eidam 40% 90g",kcal:282},{name:"Slunečnice 40g",kcal:254,swappable:true,swapWith:{name:"Eidam 40% 100g",kcal:313}}],applyCalcium:true},
+    {id:"C_PRE_SLEEP",    timeStart:"22:30",timeEnd:"01:00", label:"Před spaním",            type:"supl",  tags:["FLEX"],  supls:[{name:"Taurin",qty:2},{name:"Mg+B6",qty:2}],foods:[],reqAcid:true},
+    {id:"C_SLEEP_1",      timeStart:"01:00",timeEnd:"02:00", label:"Spánek (Začátek)",       type:"sleep", tags:["ANCHOR"],supls:[],foods:[]}
+  ]},
+  V:{label:"VÍKENDOVÝ REŽIM",emoji:"🟪",resetTime:"02:00",schedule:[
+    {id:"V_SLEEP_2",      timeStart:"02:00",timeEnd:"10:00", label:"Spánek (Pokračování)",   type:"sleep", tags:["SOFT_ANCHOR"],supls:[],foods:[]},
+    {id:"V_WAKE",         timeStart:"10:00",timeEnd:"11:00", label:"Budíček",                type:"info",  tags:["INFO"],  supls:[],foods:[]},
+    {id:"V_CHEESE_1",     timeStart:"11:00",timeEnd:"13:00", label:"Sýr I.",                 type:"food",  tags:["FLEX"],  supls:[{name:"D3+K2",qty:1}],foods:[{name:"Eidam 40% 100g",kcal:313}],applyCalcium:true},
+    {id:"V_MEAT_1",       timeStart:"13:30",timeEnd:"14:30", label:"Maso / Rýže 1/2",       type:"food",  tags:["FLEX"],  supls:[{name:"Ca+Mg+Zn",qty:1}],foods:[{name:"Maso/rýže 1/2",kcal:518}],reqAcid:true,why:MEAT_RICE_INFO},
+    {id:"V_PREWORK",      timeStart:"14:30",timeEnd:"15:00", label:"Inkubace před výkonem", type:"supl",  tags:["FLEX"],  supls:[{name:"Taurin",qty:2}],foods:[]},
+    {id:"V_WORKOUT",      timeStart:"15:00",timeEnd:"17:00", label:"TRÉNINK 💪",             type:"work",  tags:["SOFT_ANCHOR"],supls:[],foods:[]},
+    {id:"V_POST",         timeStart:"17:00",timeEnd:"17:30", label:"Anabolic Window",        type:"branch",tags:["FLEX"],  supls:[],foods:[],
+      options:[
+        {id:"whey",  icon:"🍌",label:"Whey + Banán",type:"whey",  kcal:250,why:"Rychlý cukr. Žaludek volný za 45 min."},
+        {id:"casein",icon:"🍮",label:"Lípánek",      type:"calcium",kcal:350,why:"Kasein/Tuk — uzamkne zinek na 2.5h!"}
+      ]},
+    {id:"V_MEAT_2",       timeStart:"18:15",timeEnd:"20:00", label:"Maso / Rýže 2/2",       type:"food",  tags:["FLEX"],  supls:[],foods:[{name:"Maso/rýže 2/2",kcal:518}],reqAcid:true,why:MEAT_RICE_INFO},
+    {id:"V_SWAP_NIGHT",   timeStart:"20:00",timeEnd:"00:00", label:"Night Refill (Sýr + Slunečnice)",type:"food",tags:["SWAP"],supls:[],foods:[{name:"Eidam 40% 90g",kcal:282},{name:"Slunečnice 40g",kcal:254,swappable:true,swapWith:{name:"Eidam 40% 100g",kcal:313}}],applyCalcium:true},
+    {id:"V_SLEEP_1",      timeStart:"00:00",timeEnd:"02:00", label:"Spánek (Začátek)",       type:"sleep", tags:["SOFT_ANCHOR"],supls:[],foods:[]}
+  ]}
+};
+const CODEX=[
+  {id:"calcium-zinc",icon:"🧬",title:"VÁPNÍK VS. ZINEK",text:"Sýr blokuje Zinek z masa. Směr Sýr/Lípánek → Maso/Zinek zůstává tvrdý zámek 2-2,5 hodiny, protože tuk a kasein tvoří vápníkovou deku. Směr Maso/Zinek → Sýr je podle V7 fast-track: 60-90 minut stačí, protože zinek v kyselém prostředí podteče do střeva.",bg:"rgba(67,25,5,.42)",border:"#7c2d12",color:"#fb923c"},
+  {id:"acid",icon:"🍋",title:"KYSELÁ ALCHEMIE",text:"Voda s 20% citronu (pH 2) plynule upgraduje levný zinek na citrát. Kyselé prostředí HCl + citronová voda pomáhá rozpustit oxidy/uhličitany z tablet a chrání průchod zinku do střeva.",bg:"rgba(15,23,42,.72)",border:"#1d4ed8",color:"#60a5fa"},
+  {id:"lipanek",icon:"🍮",title:"LÍPÁNEK VS BANÁN",text:"Lípánek není rychlý cukr. Je to TUK + VÁPNÍK + KASEIN, systémově podobný sýru. Nepatří jako okamžitá potréninková záchrana, ale jako slow-release palivo před noční směnou nebo společně se sýrem, až je zinek v bezpečí.",bg:"rgba(76,5,35,.58)",border:"#be185d",color:"#f472b6"},
+  {id:"emergency-cheese",icon:"🚨",title:"NOUZOVÝ SÝR",text:"Záchrana při noční směně. Bílkoviny/tuky v noci nevyvolají inzulínový crash jako sacharidy. Udrží spalování, ale po prvním soustu sýra nebo Lípánku se systém zamyká proti zinku na 2-2,5 hodiny.",bg:"rgba(5,46,22,.55)",border:"#047857",color:"#34d399"},
+  {id:"meat-zinc",icon:"🥩",title:"PROČ ZINEK (CA+MG+ZN) MASO MILUJE",text:"Maso spustí HCl a zinek v tabletě se lépe rozpustí. V Maso/Rýže není významný vápník, takže zinek nemá konkurenci na transportních drahách. Maso → Ca+Mg+Zn má proto odstup 0 minut.",bg:"rgba(30,41,59,.62)",border:"#3b82f6",color:"#93c5fd"},
+  {id:"taurine",icon:"💧",title:"PROČ TAURIN MASO A RÝŽI NEŘEŠÍ",text:"Taurin je dobře rozpustná aminokyselina. Standardní čistá porce Maso/Rýže mu nevadí. Pro Taurin nalačno před prvním jídlem ale platí 30-45 minut, proto appka drží konzervativních 45 minut.",bg:"rgba(20,83,45,.42)",border:"#16a34a",color:"#86efac"},
+  {id:"cheese-lock",icon:"🧀",title:"PROČ SÝR = NEPŘÍTEL",text:"Sýr je problém kvůli vysokému vápníku, kaseinu a tuku. Směrem dopředu proti zinku a hořčíku tvoří pomalou deku. D3+K2 se naopak k sýru hodí okamžitě, protože jsou rozpustné v tucích.",bg:"rgba(127,29,29,.42)",border:"#ef4444",color:"#fca5a5"},
+  {id:"stomach-filter",icon:"🧪",title:"V7: ŽALUDEK NENÍ MÍCHAČKA",text:"Starý strach, že se maso, rýže, zinek a pozdější sýr v žaludku celé hodiny míchají, je pro čistý protokol zastaralý. Žaludek funguje jako filtr: tekutiny a rozpuštěný zinek odcházejí rychle, pevné maso zůstává déle.",bg:"rgba(8,47,73,.5)",border:"#0284c7",color:"#7dd3fc"},
+  {id:"fast-track",icon:"⏱",title:"V7: FAST-TRACK 60-90 MIN",text:"Maso/Rýže + Zinek → Sýr/Lípánek: sweet spot je 60-90 minut. 30 minut je málo, protože pilulka se teprve rozpouští. Po 60 minutách už zinek bezpečně podteče do střeva; 90 minut je klidná rezerva.",bg:"rgba(69,26,3,.46)",border:"#f59e0b",color:"#fbbf24"},
+  {id:"double-shot",icon:"🥩",title:"V6/V7: DOUBLE SHOT",text:"Dvě porce masa s krátkou pauzou ber jako jeden trávicí blok. Legacy daň 3 hodiny se ruší: sýr nebo Lípánek lze nasadit 60-90 minut od dojedení druhé porce, pokud zinek šel s první porcí a měl náskok.",bg:"rgba(30,41,59,.5)",border:"#64748b",color:"#cbd5e1"},
+  {id:"final-a",icon:"🟦",title:"FINÁLNÍ OSA TÝDEN A",text:"06:15 Mg+B6 + Taurin; 07:00 Sýr I.; 08:00 Spánek; 14:15 Budíček + Taurin; 15:00 Maso/Rýže 1/2 + Zinek; 17:00 Maso/Rýže 2/2; 18:00-19:30 Sýr II+III + D3+K2 + případný Lípánek; 20:00 konec příjmu potravy.",bg:"rgba(30,58,138,.34)",border:"#3b82f6",color:"#93c5fd"}
+];
+
+function t2m(t){if(!t)return 0;const[h,m]=t.split(":").map(Number);return h*60+m}
+function m2t(m){let x=Math.floor(m)%1440;if(x<0)x+=1440;return String(Math.floor(x/60)).padStart(2,"0")+":"+String(x%60).padStart(2,"0")}
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function div(cls,txt){return el("div",cls,txt)}
+function btn(cls,txt,onClick){const b=el("button",cls,txt);if(onClick)b.addEventListener("click",onClick);return b}
+function signedMin(n){return n>0?`+${n} min`:n<0?`${n} min`:"0 min"}
+
+let FALLBACK_READY=false;
+const STORE=(()=>{
+  const memory={};
+  try{const k="nos_test";localStorage.setItem(k,"1");localStorage.removeItem(k);
+    return{persistent:true,getItem:k=>localStorage.getItem(k),setItem:(k,v)=>localStorage.setItem(k,v),removeItem:k=>localStorage.removeItem(k)};
+  }catch(e){
+    return{persistent:false,
+      getItem:k=>Object.prototype.hasOwnProperty.call(memory,k)?memory[k]:null,
+      setItem:(k,v)=>{memory[k]=String(v);if(FALLBACK_READY)persistFallback(k,String(v));},
+      removeItem:k=>{delete memory[k];}};
+  }
+})();
+function loadJson(key,fallback){try{const r=STORE.getItem(key);return r?JSON.parse(r):fallback}catch{return fallback}}
+function openFallbackDB(){return new Promise((res,rej)=>{if(!("indexedDB"in window)){rej(new Error("no idb"));return}const r=indexedDB.open("nutri_os_store",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function readFallback(key){const db=await openFallbackDB();return new Promise(r=>{const t=db.transaction("kv","readonly"),q=t.objectStore("kv").get(key);q.onsuccess=()=>r(q.result??null);q.onerror=()=>r(null)})}
+async function persistFallback(key,value){try{const db=await openFallbackDB();const t=db.transaction("kv","readwrite");t.objectStore("kv").put(value,key)}catch(e){}}
+async function hydrateFallbackState(){
+  if(STORE.persistent)return;
+  try{
+    const keys=["nos_week","nos_active_week","nos_theme","nos_logs","nos_skips","nos_fswaps","nos_last_cycle"];
+    const vals=await Promise.all(keys.map(k=>readFallback(k)));
+    vals.forEach((v,i)=>{if(v!=null)STORE.setItem(keys[i],v)});
+    S.week=STORE.getItem("nos_week")||S.week;
+    S.activeWeek=STORE.getItem("nos_active_week")||S.activeWeek;
+    S.theme=THEMES.find(t=>t.id===STORE.getItem("nos_theme"))||S.theme;
+    S.logs=loadJson("nos_logs",S.logs);S.skips=loadJson("nos_skips",S.skips);S.foodSwaps=loadJson("nos_fswaps",S.foodSwaps);
+  }catch(e){}
+  FALLBACK_READY=true;render();
+}
+
+const S={
+  week:STORE.getItem("nos_week")||"A",
+  activeWeek:STORE.getItem("nos_active_week")||STORE.getItem("nos_week")||"A",
+  theme:THEMES.find(t=>t.id===STORE.getItem("nos_theme"))||THEMES[0],
+  intensity:parseFloat(STORE.getItem("nos_intensity")||"0.18"),
+  tab:"now",
+  logs:loadJson("nos_logs",{}),skips:loadJson("nos_skips",{}),foodSwaps:loadJson("nos_fswaps",{}),
+  manualTime:null,expandedWhy:{},modal:null,now:new Date(),autoScroll:true
+};
+
+(function(){
+  const sched=WEEKS[S.activeWeek].schedule;if(!sched.length)return;
+  const resetTimeStr=WEEKS[S.activeWeek].resetTime||sched[0].timeStart||sched[0].time||"00:00";
+  const cycleStartMin=t2m(resetTimeStr),now=new Date(),nowMin=now.getHours()*60+now.getMinutes(),cd=new Date(now);
+  if(nowMin<cycleStartMin)cd.setDate(cd.getDate()-1);
+  const cycleKey=cd.toISOString().slice(0,10)+"_"+sched[0].id;
+  if(STORE.getItem("nos_last_cycle")!==cycleKey){S.logs={};S.skips={};S.foodSwaps={};STORE.setItem("nos_logs","{}");STORE.setItem("nos_skips","{}");STORE.setItem("nos_fswaps","{}")}
+  STORE.setItem("nos_last_cycle",cycleKey);
+})();
+
+function save(){
+  STORE.setItem("nos_logs",JSON.stringify(S.logs));STORE.setItem("nos_skips",JSON.stringify(S.skips));STORE.setItem("nos_fswaps",JSON.stringify(S.foodSwaps));
+  STORE.setItem("nos_week",S.week);STORE.setItem("nos_active_week",S.activeWeek);STORE.setItem("nos_theme",S.theme.id);
+  STORE.setItem("nos_intensity",String(S.intensity));
+}
+function setCSS(){
+  const r=document.documentElement,b=document.body;
+  r.style.setProperty("--p", S.theme.rgb);
+  r.style.setProperty("--intensity", String(S.intensity));
+  r.style.setProperty("--accent", S.theme.hex);
+  r.style.setProperty("--accent-alpha", S.theme.hex+"44");
+  b.style.background="#000";
+}
+function suplKey(s,x){return S.week+"_"+s.id+"_supl_"+x.name}
+function skipKey(s,x){return S.week+"_"+s.id+"_skip_supl_"+x.name}
+// ── NEW: food skip key ──
+function foodSkipKey(s,x){return S.week+"_"+s.id+"_skip_food_"+x.name}
+
+function isCalciumFoodName(n){return n.includes("Eidam")||n.includes("Lípánek")}
+function isMeatFoodName(n){return n.includes("Maso/rýže")||n.includes("Maso / Rýže")}
+function touchesEmptySupl(s){return s.supls.some(x=>x.name==="Mg+B6"||x.name==="Taurin")}
+function codexTargetFor(s){
+  if(s.label.includes("Maso / Rýže"))return s.supls.some(x=>x.name==="Ca+Mg+Zn")?"meat-zinc":"fast-track";
+  if(s.label.includes("Sýr")||s.label.includes("Lípánek"))return"cheese-lock";
+  if(s.supls.some(x=>x.name==="Taurin"))return"taurine";
+  if(s.supls.some(x=>x.name==="Ca+Mg+Zn"))return"meat-zinc";
+  if(s.supls.some(x=>x.name==="D3+K2"))return"cheese-lock";
+  if(s.type==="branch")return"lipanek";
+  if(S.week==="A")return"final-a";
+  return"calcium-zinc";
+}
+function openCodex(target){S.tab="codex";S.codexTarget=target;render()}
+
+function tryLog(s, bioNow, callback){
+  if(s.lockReason && bioNow < s.lockUntil){
+    S.modal = {
+      type: "confirm",
+      title: "⚠ OCHRANNÝ ZÁMEK",
+      msg: `Tento krok je momentálně blokován!\n\nDůvod: ${s.lockReason}\nZbývá: ${s.lockUntil - bioNow} min.\n\nOpravdu chcete záznam vynutit a porušit protokol?`,
+      onOk: () => { callback(); S.modal = null; render(); }
+    };
+    render();
+  } else {
+    callback();
+  }
+}
+
+function computeEngine(){
+  const active=S.manualTime||S.now,rawNowMin=active.getHours()*60+active.getMinutes();
+  
+  let ts = STORE.getItem("nos_anchor_ts");
+  let sh = STORE.getItem("nos_anchor_shift");
+  
+  if((!ts || !sh) && ["A","B","C"].includes(S.activeWeek)){
+    const realNow = S.now;
+    const day = realNow.getDay() || 7;
+    const m = new Date(realNow); m.setHours(0,0,0,0); m.setDate(m.getDate() - day + 1);
+    ts = m.getTime();
+    sh = S.activeWeek;
+    STORE.setItem("nos_anchor_ts", ts);
+    STORE.setItem("nos_anchor_shift", sh);
+  }
+
+  if(ts && sh && ["A","B","C"].includes(S.activeWeek)){
+    const day = active.getDay() || 7;
+    const m = new Date(active); m.setHours(0,0,0,0); m.setDate(m.getDate() - day + 1);
+    const diffWeeks = Math.round((m.getTime() - parseInt(ts)) / (1000 * 60 * 60 * 24 * 7));
+    const seq = ["A", "B", "C"], idx = seq.indexOf(sh);
+    if(idx > -1){
+      let nIdx = (idx + diffWeeks) % 3; if(nIdx < 0) nIdx += 3;
+      const calcShift = seq[nIdx];
+      if(S.activeWeek !== calcShift){
+        const oldActive = S.activeWeek;
+        S.activeWeek = calcShift; 
+        STORE.setItem("nos_active_week", calcShift);
+        if(S.week === oldActive){ S.week = calcShift; STORE.setItem("nos_week", calcShift); }
+      }
+    }
+  }
+
+  const baseSched=JSON.parse(JSON.stringify(WEEKS[S.week].schedule)),isActiveWeek=S.week===S.activeWeek;
+  if(!baseSched.length)return{slots:[],currentIdx:-1,locks:[],bioNow:rawNowMin,isActiveWeek};
+  let offset=0,prev=-1;
+  baseSched.forEach(s=>{
+    const tStr=s.timeStart||s.time;
+    const m=t2m(tStr);
+    if(prev!==-1&&m<prev)offset+=1440;
+    s.absBase=m+offset;
+    s._hasExplicitEnd=!!s.timeEnd;
+    prev=m;
+  });
+  baseSched.forEach((s,i)=>{
+    if(s._hasExplicitEnd){
+      let em=t2m(s.timeEnd);
+      if(em<=s.absBase%1440)em+=1440;
+      const cycleOffset=Math.floor(s.absBase/1440)*1440;
+      s.endTime=em+cycleOffset;
+      if(s.endTime<=s.absBase)s.endTime+=1440;
+    }else{
+      s.endTime=i+1<baseSched.length?baseSched[i+1].absBase:s.absBase+480;
+    }
+  });
+  const cycleStart=baseSched[0].absBase;
+  const lastSlotEnd=baseSched[baseSched.length-1].endTime||baseSched[baseSched.length-1].absBase+480;
+  let bioNow=rawNowMin;
+  if(bioNow<cycleStart){
+    const bioNowShifted=bioNow+1440;
+    if(bioNowShifted<=lastSlotEnd)bioNow=bioNowShifted;
+  }
+  if(!isActiveWeek){
+    const out=baseSched.map(s=>Object.assign(s,{computedMin:s.absBase,dynTime:m2t(s.absBase),isComplete:false,isMissed:false,isDrifted:false,delayReason:null,lockReason:null,lockUntil:0}));
+    return{slots:out,currentIdx:findCurrent(out,bioNow),locks:[],bioNow,isActiveWeek};
+  }
+  let lastCalcium=-Infinity,lastWhey=-Infinity,lastTaurin=-Infinity,lastMeat=-Infinity;
+  baseSched.forEach(s=>{
+    s.supls.forEach(x=>{const lg=S.logs[suplKey(s,x)];if(lg&&lg.time<=bioNow&&x.name==="Taurin")lastTaurin=Math.max(lastTaurin,lg.time)});
+    s.foods.forEach(x=>{
+      const lg=S.logs[S.week+"_"+s.id+"_food_"+x.name];if(!lg||lg.time>bioNow)return;
+      const sk=S.week+"_"+s.id+"_swap_"+x.name,isSwapped=x.swappable&&S.foodSwaps[sk],eff=isSwapped?x.swapWith:x;
+      if(isCalciumFoodName(eff.name))lastCalcium=Math.max(lastCalcium,lg.time);
+      if(isMeatFoodName(eff.name))lastMeat=Math.max(lastMeat,lg.time);
+    });
+    if(s.type==="branch"){const lg=S.logs[S.week+"_"+s.id+"_branch"];if(lg&&lg.time<=bioNow){if(lg.optId==="casein")lastCalcium=Math.max(lastCalcium,lg.time);if(lg.optId==="whey")lastWhey=Math.max(lastWhey,lg.time)}}
+  });
+  const locks=[];
+  if(lastTaurin+TAURIN_FAST_MIN>bioNow)locks.push({msg:`⏳ Trávení Taurinu... Jídlo odemčeno za ${lastTaurin+TAURIN_FAST_MIN-bioNow} min`,until:lastTaurin+TAURIN_FAST_MIN,type:"taurin"});
+  if(lastCalcium+CALCIUM_LOCK_MIN>bioNow)locks.push({msg:`⏳ VÁPNÍKOVÝ ZÁMEK: Zinek/Maso uzamčeny na ${lastCalcium+CALCIUM_LOCK_MIN-bioNow} min`,until:lastCalcium+CALCIUM_LOCK_MIN,type:"calcium"});
+  if(lastWhey+WHEY_LOCK_MIN>bioNow)locks.push({msg:`⏳ Trávení Whey... Maso odemčeno za ${lastWhey+WHEY_LOCK_MIN-bioNow} min`,until:lastWhey+WHEY_LOCK_MIN,type:"whey"});
+  
+  const out=[];
+  lastCalcium=-Infinity;lastWhey=-Infinity;lastTaurin=-Infinity;lastMeat=-Infinity;
+  for(const s of baseSched){
+    const isWS=s.type==="work"||s.type==="sleep"||s.type==="info",isBranch=s.type==="branch";
+    const prev={calcium:lastCalcium,whey:lastWhey,taurin:lastTaurin,meat:lastMeat};
+    let done=0,closed=0,maxLog=null;
+    s.supls.forEach(x=>{const lk=suplKey(s,x),sk=skipKey(s,x),lg=S.logs[lk];if(lg){done++;closed++;if(!maxLog||lg.time>maxLog)maxLog=lg.time}else if(S.skips[sk])closed++});
+    // ── PATCHED: food skips count toward closed ──
+    s.foods.forEach(x=>{const lk=S.week+"_"+s.id+"_food_"+x.name,fsk=foodSkipKey(s,x),lg=S.logs[lk];if(lg){done++;closed++;if(!maxLog||lg.time>maxLog)maxLog=lg.time}else if(S.skips[fsk])closed++;});
+    if(isBranch){const lg=S.logs[S.week+"_"+s.id+"_branch"];if(lg){done++;closed++;maxLog=lg.time}}
+    const total=s.supls.length+s.foods.length+(isBranch?1:0);
+    let isComplete=total>0&&closed===total;
+    let minAllow=s.absBase,delayReason=null;
+    
+    if(s.reqAcid){
+      if(prev.calcium+CALCIUM_LOCK_MIN>minAllow){minAllow=prev.calcium+CALCIUM_LOCK_MIN;delayReason="Vápníkový zámek (150 min)"}
+      if(prev.whey+WHEY_LOCK_MIN>minAllow){minAllow=prev.whey+WHEY_LOCK_MIN;delayReason="Trávení Whey (45 min)"}
+      if(touchesEmptySupl(s)&&prev.meat+MEAT_TO_EMPTY_SUPL_MIN>minAllow){minAllow=prev.meat+MEAT_TO_EMPTY_SUPL_MIN;delayReason="Vyprázdnění po Maso/Rýže (120 min)"}
+    }
+    if(s.type==="food"||s.applyCalcium){
+      if(prev.taurin+TAURIN_FAST_MIN>minAllow){minAllow=prev.taurin+TAURIN_FAST_MIN;delayReason="Čeká se na doznění Taurinu nalačno"}
+      if(s.applyCalcium&&prev.meat+MEAT_TO_CHEESE_MIN>minAllow){minAllow=prev.meat+MEAT_TO_CHEESE_MIN;delayReason="Fast-track odstup po Maso/Rýže (90 min)"}
+    }
+    
+    s.lockUntil = minAllow;
+    s.lockReason = delayReason;
+    
+    if(isWS){
+      s.computedMin=s.absBase;s.isComplete=false;s.isMissed=false;s.delayReason=null;
+    }
+    else if(isComplete&&maxLog!==null){
+      s.computedMin=maxLog;s.isComplete=true;s.isMissed=false;s.delayReason=null;
+    }
+    else if(isComplete){
+      s.computedMin=s.absBase;s.isComplete=true;s.isMissed=false;s.delayReason=null;
+    }
+    else if(!isComplete&&bioNow>=s.endTime){
+      s.computedMin=s.absBase;
+      s.isComplete=false;
+      s.isMissed=true;
+      s.delayReason=minAllow>bioNow?delayReason:null;
+    }
+    else{
+      s.computedMin=bioNow<s.absBase?Math.max(minAllow,s.absBase):Math.max(minAllow,bioNow,s.absBase);
+      s.isComplete=false;
+      s.isMissed=false;
+      s.delayReason=minAllow>s.absBase&&minAllow>=bioNow?delayReason:null;
+    }
+    s.dynTime=m2t(s.computedMin);
+    s.isDrifted = !s.isMissed && !isWS && s.computedMin - s.absBase > 4;
+    s.doneCount=done;s.closedCount=closed;s.totalCount=total;out.push(s);
+    s.supls.forEach(x=>{const lg=S.logs[suplKey(s,x)];if(lg&&x.name==="Taurin")lastTaurin=Math.max(lastTaurin,lg.time)});
+    s.foods.forEach(x=>{
+      const lg=S.logs[S.week+"_"+s.id+"_food_"+x.name];if(!lg)return;
+      const sk=S.week+"_"+s.id+"_swap_"+x.name,isSwapped=x.swappable&&S.foodSwaps[sk],eff=isSwapped?x.swapWith:x;
+      if(isCalciumFoodName(eff.name))lastCalcium=Math.max(lastCalcium,lg.time);
+      if(isMeatFoodName(eff.name))lastMeat=Math.max(lastMeat,lg.time);
+    });
+    if(s.type==="branch"){const lg=S.logs[S.week+"_"+s.id+"_branch"];if(lg){if(lg.optId==="casein")lastCalcium=Math.max(lastCalcium,lg.time);if(lg.optId==="whey")lastWhey=Math.max(lastWhey,lg.time)}}
+  }
+  return{slots:out,currentIdx:findCurrent(out,bioNow),locks,bioNow,isActiveWeek};
+}
+function findCurrent(slots,bioNow){let i=-1;for(let j=0;j<slots.length;j++){if(bioNow>=slots[j].absBase&&bioNow<slots[j].endTime){i=j;break}}if(i===-1&&slots.length&&bioNow>=slots[slots.length-1].endTime)i=slots.length-1;return i}
+function guardActive(fn){const e=computeEngine();if(!e.isActiveWeek){S.modal={type:"alert",title:"Náhledový režim",msg:"Nejdřív nastavte tuto směnu jako aktivní (tlačítkem nahoře)."};render();return}fn(e)}
+
+function render(){
+  setCSS();
+  const app=document.getElementById("app");app.innerHTML="";
+  const{slots,currentIdx,locks,bioNow,isActiveWeek}=computeEngine();
+  const active=S.manualTime||S.now,nowStr=active.toLocaleTimeString("cs-CZ",{hour:"2-digit",minute:"2-digit"});
+  
+  const wrap=div("");wrap.style.cssText="min-height:100vh;padding-bottom:90px";
+  
+  if(S.manualTime){
+    const banner=div("sim-banner","⚠️ SIMULACE ČASOVÉ OSY ⚠️");
+    wrap.appendChild(banner);
+  }
+  wrap.appendChild(div("app-version",APP_VERSION));
+
+  const tEngine=div("zion-engine");
+  const tPalette=div("zion-palette");
+  THEMES.forEach(t=>{
+    const d=div("zion-dot"+(S.theme.id===t.id?" active":""));
+    d.style.setProperty("--dot-color",t.hex);
+    d.title=t.id;
+    d.addEventListener("click",()=>{S.theme=t;save();render()});
+    tPalette.appendChild(d);
+  });
+  tEngine.appendChild(tPalette);
+  
+  const tTune=div("zion-tune");
+  const tLabel=div("zion-tune-label","");
+  tLabel.innerHTML=`<span style="opacity:.5;letter-spacing:.1em;font-size:9px">MICRO TUNING</span><span class="zion-tune-val">${Math.round(S.intensity*100)}%</span>`;
+  const tSlider=el("input","zion-slider");
+  tSlider.type="range";tSlider.min="0.05";tSlider.max="0.55";tSlider.step="0.01";tSlider.value=String(S.intensity);
+  tSlider.style.setProperty("--pct",`${Math.round(((S.intensity-0.05)/0.5)*100)}%`);
+  tSlider.addEventListener("input",e=>{
+    S.intensity=parseFloat(e.target.value);
+    tSlider.style.setProperty("--pct",`${Math.round(((S.intensity-0.05)/0.5)*100)}%`);
+    tLabel.querySelector(".zion-tune-val").textContent=Math.round(S.intensity*100)+"%";
+    document.documentElement.style.setProperty("--intensity",String(S.intensity));
+    save();
+  });
+  tTune.appendChild(tLabel);tTune.appendChild(tSlider);
+  tEngine.appendChild(tTune);
+  wrap.appendChild(tEngine);
+
+  const cWrap=div("");cWrap.style.cssText="text-align:center;padding:8px 16px 12px";
+  const cEl=div("",nowStr);cEl.id="time-big";cEl.style.color=S.theme.hex;cWrap.appendChild(cEl);
+  
+  const simRow=div("sim-ctrl-row");
+  const simInput=el("input","sim-input");
+  simInput.type="datetime-local";
+  const pad=n=>String(n).padStart(2,'0');
+  simInput.value=`${active.getFullYear()}-${pad(active.getMonth()+1)}-${pad(active.getDate())}T${pad(active.getHours())}:${pad(active.getMinutes())}`;
+  simInput.addEventListener("change",e=>{
+    if(e.target.value){
+      S.manualTime=new Date(e.target.value);
+      S._scrollToCurrent=true;
+      render();
+    }
+  });
+  simRow.appendChild(simInput);
+  
+  if(S.manualTime){
+    const sr=btn("sim-reset","✖ RESET",()=>{S.manualTime=null;S._scrollToCurrent=true;render()});
+    simRow.appendChild(sr);
+  }
+  cWrap.appendChild(simRow);
+
+  const asBtn=btn("",S.autoScroll?"🎯 AUTO-SCROLL: ZAP":"🎯 AUTO-SCROLL: VYP",()=>{S.autoScroll=!S.autoScroll;render()});
+  asBtn.style.cssText=`font-size:9px;font-weight:900;letter-spacing:.08em;padding:4px 10px;border-radius:6px;margin-top:12px;border:1px solid ${S.autoScroll?"rgba(var(--p),.4)":"rgba(255,255,255,.1)"};background:${S.autoScroll?"rgba(var(--p),.12)":"rgba(255,255,255,.04)"};color:${S.autoScroll?"rgb(var(--p))":"rgba(255,255,255,.3)"}`;
+  cWrap.appendChild(asBtn);
+  wrap.appendChild(cWrap);
+
+  const wRow=div("");wRow.style.cssText="display:flex;gap:6px;padding:0 12px 16px;max-width:480px;margin:0 auto";
+  Object.entries(WEEKS).forEach(([k,v])=>{
+    const isView=S.week===k,isActual=S.activeWeek===k;
+    const b=btn("week-btn"+(isView?" active":""),v.emoji+" "+k,()=>{S.week=k;save();render()});
+    if(isView)b.style.background=S.theme.panel;
+    if(isActual)b.innerHTML=v.emoji+" "+k+`<span style="color:${S.theme.hex};font-size:12px;margin-left:2px">●</span>`;
+    wRow.appendChild(b);
+  });
+  wrap.appendChild(wRow);
+
+  if(!isActiveWeek){
+    const aWrap=div("");aWrap.style.cssText="padding:0 12px 16px;max-width:480px;margin:0 auto";
+    const aBtn=btn("","⚡ NASTAVIT JAKO AKTIVNÍ SMĚNU",()=>{
+      S.modal={type:"confirm",title:"Přepnout aktivní směnu",msg:`Přepnout aktivní směnu na ${WEEKS[S.week].label}?\n(Tím se manuálně resetuje kotva pro rotaci A→B→C)`,
+        onOk:()=>{
+          S.activeWeek=S.week;
+          if(["A","B","C"].includes(S.week)){
+            const activeT = S.manualTime || S.now;
+            const day = activeT.getDay() || 7;
+            const m = new Date(activeT); m.setHours(0,0,0,0); m.setDate(m.getDate() - day + 1);
+            STORE.setItem("nos_anchor_ts", m.getTime()); STORE.setItem("nos_anchor_shift", S.week);
+          }
+          save();S.modal=null;render()
+        }};
+      render();
+    });
+    aBtn.style.cssText=`width:100%;padding:12px;border-radius:10px;background:${S.theme.hex}20;border:1px solid ${S.theme.hex};color:#fff;font-weight:900;letter-spacing:.05em`;
+    aWrap.appendChild(aBtn);wrap.appendChild(aWrap);
+  }
+
+  const dockWrap=div("zion-dock");
+  const tabBar=div("zion-dock-inner hide-scroll");
+  [["now","⚡ TEĎ"],["day","📋 DEN"],["food","🍎 JÍDLO"],["supls","📊 SUPLY"],["codex","📖 KODEX"]].forEach(([t,l])=>{
+    const b=btn("tab-btn"+(S.tab===t?" active":""),l,()=>{S.tab=t;if(t==="now")S._scrollToCurrent=true;render()});tabBar.appendChild(b);
+  });
+  dockWrap.appendChild(tabBar);
+  wrap.appendChild(dockWrap);
+
+  const content=div("");content.style.cssText="padding:0 12px 110px;max-width:480px;margin:0 auto";
+  if(!STORE.persistent){const w=div("zion-alert-box","⚠ Úložiště není dostupné. Data platí jen do obnovení stránky.");w.style.cssText="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);color:#fbbf24;text-align:center;font-weight:900;letter-spacing:.04em";content.appendChild(w)}
+
+  if(S.tab==="now")renderNow(content,slots,currentIdx,locks,bioNow,isActiveWeek,nowStr);
+  if(S.tab==="day")renderDay(content,slots,currentIdx,bioNow);
+  if(S.tab==="food")renderFood(content,slots,bioNow,nowStr,isActiveWeek);
+  if(S.tab==="supls")renderSupply(content,slots,bioNow,nowStr,isActiveWeek);
+  if(S.tab==="codex")renderCodex(content);
+  wrap.appendChild(content);
+  if(S.modal)renderModal(wrap,slots);
+  app.appendChild(wrap);
+
+  if(S.tab==="now"&&S._scrollToCurrent&&S.autoScroll){S._scrollToCurrent=false;requestAnimationFrame(()=>{const n=document.getElementById("current-node");if(n)n.scrollIntoView({behavior:"smooth",block:"center"})})}
+  if(S.tab==="codex"&&S.codexTarget){const t=S.codexTarget;S.codexTarget=null;requestAnimationFrame(()=>{const n=document.getElementById("codex-"+t);if(n)n.scrollIntoView({behavior:"smooth",block:"center"})})}
+}
+
+function renderNow(content,slots,currentIdx,locks,bioNow,isActiveWeek,nowStr){
+  locks.forEach(l=>{const bx=div("zion-lock-panel");bx.style.borderColor=l.type==="calcium"?"#ef4444":"#f59e0b";bx.style.background=l.type==="calcium"?"rgba(239,68,68,.15)":"rgba(245,158,11,.15)";bx.appendChild(div("lock-text",l.msg));content.appendChild(bx)});
+  if(!isActiveWeek){const p=div("zion-alert-box","👀 REŽIM NÁHLEDU (Číst pouze)");p.style.cssText="background:#1e293b;color:#94a3b8;text-align:center;font-weight:900;letter-spacing:.05em";content.appendChild(p)}
+  const tWrap=div("");tWrap.id="now-wrap";tWrap.style.cssText="position:relative;padding-left:28px";
+  tWrap.appendChild(div("timeline-line"));
+  const dot=div("timeline-dot");dot.id="now-live-dot";
+  dot.style.cssText=`background:${S.theme.hex};top:0;transition:top .5s ease;box-shadow:0 0 12px ${S.theme.hex}`;
+  tWrap.appendChild(dot);
+
+  slots.forEach((s,idx)=>{
+    const isStale=s.endTime<bioNow&&s.doneCount===0&&(s.type==="info"||s.type==="work"||s.type==="sleep");
+    const isCur=idx===currentIdx;
+    const isWS=s.type==="work"||s.type==="sleep",isOngoingWork=isCur&&isWS;
+    const isInfoNode=s.type==="info";
+    const isMissed=s.isMissed&&!isInfoNode;
+    const hasLogs=s.doneCount>0;
+    const isPastInfo=isInfoNode&&!isCur&&bioNow>(s.endTime||s.absBase+60);
+    const ghostClass=(isStale||isPastInfo)&&!hasLogs&&isInfoNode?"ghost":"";
+    const nodeWrap=div(ghostClass);
+    nodeWrap.style.marginBottom=isInfoNode?"8px":"14px";
+    if(isCur)nodeWrap.id="current-node";
+    if(isMissed&&!isStale)nodeWrap.appendChild(div("missed-badge","⚠ PROPÁSNUTÝ UZEL — nebyl označen jako splněný"));
+    else if(isCur){const cb=div("cur-badge",isOngoingWork?"▶ PROBÍHÁ ("+s.label+")":"▶ OPERAČNÍ CENTRUM / PRÁVĚ TEĎ");cb.style.color=S.theme.hex;nodeWrap.appendChild(cb)}
+
+    const card=div("zion-node-card"+(isMissed&&!isStale?" zion-missed":isCur?" zion-active":""));
+    const row=div("");row.style.cssText="display:flex;justify-content:space-between;align-items:flex-start;gap:12px";
+    const left=div("");left.style.cssText="flex:1;min-width:0";
+    const timeRow=div("");timeRow.style.cssText="display:flex;align-items:center;gap:6px;margin-bottom:4px";
+    const isInfoType=s.type==="info"||s.type==="work"||s.type==="sleep";
+    const timeLabel=isInfoType&&s.timeStart&&s.timeEnd ? s.timeStart+" – "+s.timeEnd : s.dynTime;
+    const tSpan=el("span","",timeLabel);tSpan.style.cssText="font-size:13px;font-weight:700;"+(isMissed&&!isStale?"color:#ef4444":isCur?"color:"+S.theme.hex:s.isDrifted?"color:#f97316":isInfoType?"color:rgba(255,255,255,0.35)":"color:#6b7280");timeRow.appendChild(tSpan);
+    
+    if(s.isDrifted&&!s.isMissed){
+      const origTime = s.timeStart || s.time;
+      if(origTime){
+        const orig=el("span","","("+origTime+")");
+        orig.style.cssText="font-size:10px;color:#374151;text-decoration:line-through";
+        timeRow.appendChild(orig);
+      }
+    }
+    
+    left.appendChild(timeRow);
+    const title=el("h3","",s.label);title.style.cssText="font-size:15px;font-weight:700;color:#f1f5f9;line-height:1.3";left.appendChild(title);
+    if(s.tags&&s.tags.length){
+      const tagRow=div("");tagRow.style.cssText="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap";
+      s.tags.forEach(tag=>{
+        const colors={"ANCHOR":"rgba(59,130,246,.25)","FLEX":"rgba(16,185,129,.2)","SWAP":"rgba(168,85,247,.2)","INFO":"rgba(255,255,255,.07)","SOFT_ANCHOR":"rgba(245,158,11,.2)"};
+        const textColors={"ANCHOR":"#60a5fa","FLEX":"#34d399","SWAP":"#c084fc","INFO":"#475569","SOFT_ANCHOR":"#fbbf24"};
+        const tb=div("",tag);
+        tb.style.cssText=`font-size:8px;font-weight:900;letter-spacing:.1em;padding:2px 6px;border-radius:4px;background:${colors[tag]||"rgba(255,255,255,.07)"};color:${textColors[tag]||"#64748b"}`;
+        tagRow.appendChild(tb);
+      });
+      left.appendChild(tagRow);
+    }
+    if(s.delayReason&&!s.isComplete){const d=div("",`⏳ Posunuto: ${s.delayReason}`);d.style.cssText="font-size:10px;font-weight:700;color:#fbbf24;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);padding:6px 10px;border-radius:6px;margin-top:8px;display:inline-block";left.appendChild(d)}
+    if(s.why){
+      const wb=btn("why-btn",S.expandedWhy[s.id]?"▼ skrýt info":"ℹ INFO",()=>{S.expandedWhy[s.id]=!S.expandedWhy[s.id];render()});left.appendChild(wb);
+      if(S.expandedWhy[s.id]){const wb2=div("zion-why-text",s.why);const more=btn("","Číst víc v Kodexu",()=>openCodex(codexTargetFor(s)));more.style.cssText="display:block;margin-top:8px;padding:7px 10px;border-radius:8px;background:#0f172a;border:1px solid #1e293b;color:"+S.theme.hex+";font-size:10px;font-weight:900";wb2.appendChild(more);left.appendChild(wb2)}
+    }
+    const right=div("");right.style.cssText="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0";
+    s.supls.forEach(x=>renderInlineSuplButton(right,s,x,bioNow,nowStr,isMissed));
+    s.foods.forEach(x=>renderInlineFoodButton(right,s,x,bioNow,nowStr,isMissed));
+    if(s.type==="branch")renderBranch(right,s,bioNow,nowStr);
+    row.appendChild(left);row.appendChild(right);card.appendChild(row);nodeWrap.appendChild(card);tWrap.appendChild(nodeWrap);
+  });
+  content.appendChild(tWrap);
+
+  requestAnimationFrame(()=>{
+    const wrap=document.getElementById("now-wrap");const dot=document.getElementById("now-live-dot");
+    if(!wrap||!dot)return;
+    dot.style.transition="none";
+    const cur=document.getElementById("current-node");
+    if(cur&&currentIdx>=0&&currentIdx<slots.length){
+      const s=slots[currentIdx],progress=Math.max(0,Math.min(1,(bioNow-s.absBase)/(s.endTime-s.absBase)));
+      dot.style.top=(cur.offsetTop+cur.offsetHeight*progress)+"px";
+    }else{dot.style.display="none"}
+    requestAnimationFrame(()=>{dot.style.transition="top .5s ease"});
+  });
+}
+
+function renderDay(content,slots,currentIdx,bioNow){
+  const wrap=div("");wrap.id="day-wrap";wrap.style.cssText="position:relative;padding-left:0;padding-top:6px;padding-bottom:40px";
+  wrap.appendChild(div("day-track"));wrap.appendChild(div("day-track-ideal"));
+  const liveDot=div("day-live-dot");liveDot.id="day-live-dot";wrap.appendChild(liveDot);
+
+  slots.forEach((s,idx)=>{
+    const node=div("day-node"+(s.isComplete?" done":"")+(idx===currentIdx?" active":""));
+    node.style.marginTop=idx===0?"0":"14px";
+    node.appendChild(div("day-node-dot"));node.appendChild(div("day-tick"));
+    const win=div("zion-day-window");
+    const isInfoTypeD=s.type==="info"||s.type==="work"||s.type==="sleep";
+    const dayTimeLabel=isInfoTypeD&&s.timeStart&&s.timeEnd ? s.timeStart : s.dynTime;
+    const time=div("day-node-time",dayTimeLabel);
+    time.style.color=s.isMissed?"#ef4444":idx===currentIdx?"var(--accent)":s.isComplete?"#f3f4f6":"#94a3b8";
+    win.appendChild(time);
+    const isTargetType=s.type==="food"||s.type==="supl"||s.type==="branch"||s.type==="swap";
+    const diff=s.computedMin-s.absBase;
+    
+    const origTime = s.timeStart || s.time;
+    if((s.dynTime!==origTime)||(isTargetType&&s.isComplete&&diff!==0)){
+      const ir=div("day-node-sub");ir.style.cssText="display:flex;gap:10px;margin-top:4px;margin-bottom:8px";
+      if(s.dynTime!==origTime){const e=div("","Ideál: "+origTime);e.style.marginTop="0";ir.appendChild(e)}
+      if(isTargetType&&s.isComplete&&diff!==0){const e=div("","Odchylka: "+signedMin(diff));e.style.cssText="margin-top:0;color:#f97316";ir.appendChild(e)}
+      win.appendChild(ir);
+    }
+    
+    win.appendChild(div("day-node-label",s.label));
+    const cycleStartMin=slots.length>0?slots[0].absBase:0;
+    const isNextDay=s.endTime<cycleStartMin;
+    const isCurD=idx===currentIdx;
+    const isPastInfoD=(s.type==="info"||s.type==="work"||s.type==="sleep")&&!isCurD&&bioNow>(s.endTime||s.absBase+60);
+    let status=(s.type==="work"||s.type==="sleep")?(isCurD?"▶ PROBÍHÁ":isPastInfoD?"✓ HOTOVO":"INFO"):s.type==="info"?(isCurD?"▶ PROBÍHÁ":isPastInfoD?"✓":"INFO"):s.isComplete?"✓ HOTOVO":s.isMissed?(isNextDay?"⚠ VČERA":"✗ MISSED"):isCurD?"▶ TEĎ":"ČEKÁ";
+    const sub=div("day-node-sub",status);
+    sub.style.color=s.isComplete?"#22c55e":s.isMissed?(isNextDay?"#64748b":"#ef4444"):isPastInfoD?"#374151":isCurD?"var(--accent)":"#64748b";
+    win.appendChild(sub);node.appendChild(win);wrap.appendChild(node);
+  });
+  content.appendChild(wrap);
+
+  requestAnimationFrame(()=>{
+    const w=document.getElementById("day-wrap");const dot=document.getElementById("day-live-dot");
+    if(!w||!dot)return;
+    dot.style.transition="none";
+    const nodes=w.querySelectorAll(".day-node");
+    if(currentIdx>=0&&currentIdx<nodes.length){
+      const node=nodes[currentIdx],s=slots[currentIdx];
+      const progress=Math.max(0,Math.min(1,(bioNow-s.absBase)/(s.endTime-s.absBase)));
+      dot.style.top=(node.offsetTop+node.offsetHeight*progress)+"px";
+    }else if(currentIdx>=nodes.length){dot.style.top="100%"}else{dot.style.top="0px"}
+    requestAnimationFrame(()=>{dot.style.transition="top .4s ease"});
+  });
+}
+
+function renderInlineSuplButton(right,s,x,bioNow,nowStr,isMissed){
+  const lk=suplKey(s,x),sk=skipKey(s,x),lg=S.logs[lk],sp=S.skips[sk];
+  if(lg){right.appendChild(btn("done-btn","✅ "+x.name+" ("+lg.timeStr+")",()=>guardActive(()=>{S.modal={key:lk,title:x.name,time:lg.timeStr};render()})))}
+  else if(sp){const b=btn("done-btn","⏭ "+x.name+" vynecháno",()=>guardActive(()=>{S.modal={type:"skip",key:sk,title:x.name,time:sp.timeStr};render()}));b.style.color="#fb7185";b.style.borderColor="#7f1d1d";right.appendChild(b)}
+  else{
+    const b=btn("supl-btn",isMissed?"↩ Zpětně: "+x.qty+"× "+x.name:"Příjem: "+x.qty+"× "+x.name,()=>guardActive(()=>{
+      tryLog(s, bioNow, () => {
+        S.logs[lk]={time:bioNow,timeStr:nowStr,isManual:false};delete S.skips[sk];save();render();
+      });
+    }));
+    b.style.color=isMissed?"#ef4444":SUPL_COLORS[x.name]||"#64748b";b.style.borderColor=b.style.color;right.appendChild(b);
+    // skip button for supls in NOW tab
+    const skipB=btn("done-btn","Vynechat",()=>guardActive(()=>{S.skips[sk]={time:bioNow,timeStr:nowStr};delete S.logs[lk];save();render()}));
+    skipB.style.cssText="font-size:9px;font-weight:900;padding:4px 9px;border-radius:7px;color:#64748b;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09)";
+    right.appendChild(skipB);
+  }
+}
+
+// ── PATCHED: renderInlineFoodButton with skip support ──
+function renderInlineFoodButton(right,s,x,bioNow,nowStr,isMissed){
+  const swapKey=S.week+"_"+s.id+"_swap_"+x.name,isSwapped=x.swappable&&S.foodSwaps[swapKey],eff=isSwapped?x.swapWith:x;
+  const lk=S.week+"_"+s.id+"_food_"+x.name,fsk=foodSkipKey(s,x),lg=S.logs[lk],fsp=S.skips[fsk];
+  const shortName=eff.name.length>24?eff.name.substring(0,22)+"…":eff.name;
+  const iw=div("");iw.style.cssText="display:flex;flex-direction:column;align-items:flex-end;gap:4px";
+  if(x.swappable){
+    const tog=btn("","🔄 Slunečnice ~ Eidam",()=>guardActive(()=>{S.foodSwaps[swapKey]=!isSwapped;delete S.logs[lk];save();render()}));
+    tog.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:6px;background:#0f172a;border:1px solid #1e293b;color:#64748b";iw.appendChild(tog);
+  }
+  if(lg){
+    iw.appendChild(btn("done-btn","✅ "+shortName+" ("+lg.timeStr+")",()=>guardActive(()=>{S.modal={key:lk,title:eff.name,time:lg.timeStr};render()})));
+  }else if(fsp){
+    // food was skipped
+    const sb=btn("done-btn","⏭ "+shortName+" vynecháno",()=>guardActive(()=>{S.modal={type:"foodskip",key:fsk,foodKey:lk,title:eff.name,time:fsp.timeStr};render()}));
+    sb.style.color="#fb7185";sb.style.borderColor="#7f1d1d";iw.appendChild(sb);
+  }else{
+    const b=btn("supl-btn",isMissed?"↩ Zpětně: "+shortName:"✓ "+shortName,()=>guardActive(()=>{
+      tryLog(s, bioNow, () => {
+        S.logs[lk]={time:bioNow,timeStr:nowStr,isManual:false};save();render();
+      });
+    }));
+    b.style.color=isMissed?"#ef4444":"#fb7185";b.style.borderColor=isMissed?"#7f1d1d":"rgba(251,113,133,.5)";
+    // skip button
+    const skipB=btn("done-btn","Vynechat",()=>guardActive(()=>{S.skips[fsk]={time:bioNow,timeStr:nowStr};delete S.logs[lk];save();render()}));
+    skipB.style.cssText="font-size:9px;font-weight:900;padding:4px 9px;border-radius:7px;color:#64748b;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09)";
+    iw.appendChild(b);iw.appendChild(skipB);
+  }
+  right.appendChild(iw);
+}
+
+function renderBranch(right,s,bioNow,nowStr){
+  const bKey=S.week+"_"+s.id+"_branch",selected=S.logs[bKey];
+  if(selected){const opt=s.options.find(o=>o.id===selected.optId);right.appendChild(btn("done-btn","✅ "+opt.label+" ("+selected.timeStr+")",()=>guardActive(()=>{S.modal={key:bKey,title:opt.label,time:selected.timeStr};render()})))}
+  else{
+    const bw=div("");bw.style.cssText="display:flex;gap:8px;width:100%;margin-top:8px";
+    s.options.forEach(opt=>{
+      const bb=btn("branch-btn",opt.icon+" "+opt.label,()=>guardActive(()=>{
+        tryLog(s, bioNow, () => {
+          S.logs[bKey]={time:bioNow,timeStr:nowStr,optId:opt.id,isManual:false};S.logs[bKey+"_opt_"+opt.id]={time:bioNow};save();render();
+        });
+      }));
+      bb.style.background=opt.type==="whey"?"rgba(234,179,8,.1)":"rgba(239,68,68,.1)";bb.style.color=opt.type==="whey"?"#fde047":"#fca5a5";bw.appendChild(bb)
+    });
+    right.appendChild(bw);right.style.alignItems="stretch"
+  }
+}
+
+// ── PATCHED: renderFood with skip support ──
+function renderFood(content,slots,bioNow,nowStr,isActiveWeek){
+  let total=0,consumed=0;const list=div("");
+  slots.forEach(s=>{
+    s.foods.forEach(f=>{
+      const swapKey=S.week+"_"+s.id+"_swap_"+f.name,isSwapped=f.swappable&&S.foodSwaps[swapKey],eff=isSwapped?f.swapWith:f;
+      const lk=S.week+"_"+s.id+"_food_"+f.name;
+      const fsk=foodSkipKey(s,f);
+      const eaten=!!S.logs[lk];
+      const foodSkipped=!eaten&&!!S.skips[fsk];
+      total+=eff.kcal;if(eaten)consumed+=eff.kcal;
+      const row=div("zion-food-row");
+      row.style.border="1px solid "+(eaten?"#14532d":foodSkipped?"#7c2d12":s.isMissed?"#7f1d1d":"#0f172a");
+      row.style.background=eaten?"rgba(5,46,22,.42)":foodSkipped?"rgba(127,29,29,.15)":s.isMissed?"rgba(239,68,68,.08)":"rgba(9,14,28,.76)";
+      const lft=div("");
+      lft.innerHTML=`<div style="font-size:11px;font-weight:700;color:${eaten?"#bbf7d0":foodSkipped?"#fca5a5":"#f1f5f9"}">${eff.name}</div><div style="font-size:9px;color:${eaten?"#4ade80":foodSkipped?"#fb7185":s.isMissed?"#ef4444":"#475569"};margin-top:2px">${isSwapped?"🧀 Náhrada · ":""}${eaten?"✓ SNĚZENO · ":foodSkipped?"⏭ VYNECHÁNO · ":s.isMissed?"⚠ MISSED · ":""}${s.label}</div>`;
+      const rgt=div("");rgt.style.cssText="display:flex;flex-direction:column;align-items:flex-end";
+      rgt.innerHTML=`<div style="font-size:11px;font-weight:900;color:${eaten?"#86efac":foodSkipped?"#64748b":"#f43f5e"}">${eff.kcal} kcal</div>`;
+      if(f.swappable){
+        const tog=btn("","🔄 Slunečnice ~ Eidam",()=>guardActive(()=>{S.foodSwaps[swapKey]=!isSwapped;delete S.logs[lk];save();render()}));
+        tog.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:6px;background:#0f172a;border:1px solid #1e293b;color:#64748b;margin-top:4px;display:block";
+        rgt.appendChild(tog);
+      }
+      if(foodSkipped){
+        // show un-skip button
+        const sb=btn("","⏭ VYNECHÁNO",()=>guardActive(()=>{S.modal={type:"foodskip",key:fsk,foodKey:lk,title:eff.name,time:S.skips[fsk].timeStr};render()}));
+        sb.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:5px;margin-top:4px;background:rgba(127,29,29,.18);color:#fb7185;border:1px solid #7f1d1d";
+        if(!isActiveWeek)sb.classList.add("muted");rgt.appendChild(sb);
+      }else{
+        const tb=btn("",eaten?"✓ SNĚZENO":s.isMissed?"↩ ZPĚTNĚ":"NEZAPSANÉ",()=>guardActive(()=>{
+          if(eaten) S.modal={key:lk,title:eff.name,time:S.logs[lk].timeStr};
+          else {
+            tryLog(s, bioNow, () => {
+              S.logs[lk]={time:bioNow,timeStr:nowStr,isManual:false};save();render();
+            });
+          }
+        }));
+        tb.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:5px;margin-top:4px;"+(eaten?"background:#052e16;color:#4ade80;border:1px solid #14532d":"background:#0f172a;color:#64748b;border:1px solid #1e293b");
+        if(!isActiveWeek)tb.classList.add("muted");rgt.appendChild(tb);
+        // add vynechat button in food tab for uneaten items
+        if(!eaten&&isActiveWeek){
+          const fskBtn=btn("","Vynechat",()=>guardActive(()=>{S.skips[fsk]={time:bioNow,timeStr:nowStr};delete S.logs[lk];save();render()}));
+          fskBtn.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:5px;margin-top:3px;background:#0f172a;color:#64748b;border:1px solid #1e293b";rgt.appendChild(fskBtn);
+        }
+      }
+      row.appendChild(lft);row.appendChild(rgt);list.appendChild(row);
+    });
+  });
+  const header=div("glass");header.style.cssText="border-radius:16px;padding:18px;text-align:center;border:1px solid #1e293b;margin-bottom:14px";
+  header.innerHTML=`<div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Kalorický progress</div><div class="kcal-display">${consumed} <span style="font-size:13px;font-weight:700;color:#64748b">/ ${total} kcal</span></div>`;
+  content.appendChild(header);content.appendChild(list);
+}
+
+function renderSupply(content,slots,bioNow,nowStr,isActiveWeek){
+  Object.keys(SUPL_COLORS).forEach(name=>{
+    const doses=[];let planned=0,taken=0;
+    slots.forEach(s=>s.supls.forEach(x=>{if(x.name===name){const lk=suplKey(s,x),sk=skipKey(s,x),lg=S.logs[lk],sp=S.skips[sk];planned+=x.qty;if(lg)taken+=x.qty;doses.push({slot:s,item:x,lk,sk,lg,sp})}}));
+    if(!planned)return;
+    const color=SUPL_COLORS[name],card=div("zion-supply-card");
+    const head=div("supply-head");const nt=div("supply-name",name);nt.style.color=color;const cnt=div("supply-count",`${taken} / ${planned} ${planned===1?"tableta":"tablety"}`);head.appendChild(nt);head.appendChild(cnt);
+    const bg=div("bar-bg");const fill=div("bar-fill");fill.style.width=(planned?taken/planned*100:0)+"%";fill.style.background=taken===planned?"#22c55e":color;bg.appendChild(fill);
+    card.appendChild(head);card.appendChild(bg);
+    doses.forEach(d=>{
+      const row=div("zion-dose-row"),time=div("dose-time",d.slot.timeStart||d.slot.time||"");row.appendChild(time);
+      if(d.lg){const done=btn("dose-action "+(d.lg.isManual?"manual":"done"),"✅ "+d.lg.timeStr+(d.lg.isManual?" (Man)":""),()=>guardActive(()=>{S.modal={key:d.lk,title:name,time:d.lg.timeStr};render()}));row.appendChild(done)}
+      else if(d.sp){const skip=btn("dose-action skip","⏭ "+d.sp.timeStr,()=>guardActive(()=>{S.modal={type:"skip",key:d.sk,title:name,time:d.sp.timeStr};render()}));row.appendChild(skip)}
+      else{
+        row.appendChild(btn("dose-action","Splnit",()=>guardActive(()=>{
+          tryLog(d.slot, bioNow, () => {
+            S.logs[d.lk]={time:bioNow,timeStr:nowStr,isManual:false};delete S.skips[d.sk];save();render();
+          });
+        })))
+      }
+      const skipBtn=btn("dose-action"+(d.sp?" skip":d.lg?" muted":""),d.sp?"Vynecháno":"Vynechat",()=>guardActive(()=>{if(d.lg)return;S.skips[d.sk]={time:bioNow,timeStr:nowStr};delete S.logs[d.lk];save();render()}));
+      row.appendChild(skipBtn);card.appendChild(row);
+    });
+    content.appendChild(card);
+  });
+  if(isActiveWeek){const rb=btn("reset-danger","🚨 TOTÁLNÍ RESET PAMĚTI DNE",()=>{S.modal={type:"confirm",title:"Reset dne",msg:"Opravdu vymazat všechny záznamy?",onOk:()=>{S.logs={};S.skips={};S.foodSwaps={};save();S.modal=null;render()}};render()});content.appendChild(rb)}
+}
+
+function renderCodex(content){
+  CODEX.forEach(c=>{const card=div("zion-codex-card");card.id="codex-"+c.id;card.style.setProperty("--codex-bg",c.bg);card.style.setProperty("--codex-border",c.border);card.style.setProperty("--codex-color",c.color);card.innerHTML=`<div class="codex-title">${c.icon} ${c.title}</div><div class="codex-text">${c.text}</div>`;content.appendChild(card)});
+  WEEKS[S.week].schedule.filter(s=>s.why).forEach(s=>{const card=div("");card.id="codex-slot-"+s.id;card.style.cssText="padding:10px 12px;border-radius:10px;border:1px solid #0f172a;background:#070b15;margin-bottom:8px";card.innerHTML=`<div style="font-size:11px;font-weight:700;color:#f1f5f9;margin-bottom:4px">${s.label}</div><div style="font-size:11px;color:#64748b;line-height:1.5">${s.why}</div>`;content.appendChild(card)});
+  const b1=btn("","💾 ZÁLOHA DAT (Export)",()=>{S.modal={type:"export",data:JSON.stringify({logs:S.logs,skips:S.skips,foodSwaps:S.foodSwaps})};render()});b1.style.cssText="width:100%;padding:12px;border-radius:10px;background:#0f172a;border:1px solid #1e293b;color:#94a3b8;font-size:11px;font-weight:900;margin-bottom:8px";
+  const b2=btn("","📂 NAHRÁT ZÁLOHU (Import)",()=>{S.modal={type:"import",inputVal:""};render()});b2.style.cssText=b1.style.cssText;
+  const b3=btn("","📋 KOPÍROVAT KÓD APP",()=>{S.modal={type:"appcode"};render()});b3.style.cssText=b1.style.cssText;
+  content.appendChild(b1);content.appendChild(b2);content.appendChild(b3);
+}
+
+function renderModal(wrap,slots){
+  const ov=div("modal-overlay");ov.addEventListener("click",e=>{if(e.target===ov){S.modal=null;render()}});
+  const box=div("zion-modal-box"),m=S.modal;
+  if(m.type==="alert"||m.type==="confirm"){
+    const ttl=div("",m.title);ttl.style.cssText="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:8px;text-align:center";
+    const msg=div("",m.msg);msg.style.cssText="font-size:12px;color:#94a3b8;text-align:center;margin-bottom:20px;line-height:1.5;white-space:pre-wrap";
+    box.appendChild(ttl);box.appendChild(msg);
+    if(m.type==="alert"){const ok=btn("","Zavřít",()=>{S.modal=null;render()});ok.style.cssText="width:100%;padding:12px;border-radius:10px;font-size:11px;font-weight:900;color:#fff;background:#1e293b";box.appendChild(ok)}
+    else{const row=div("");row.style.cssText="display:flex;gap:8px";const cancel=btn("","Zpět",()=>{S.modal=null;render()});const ok=btn("","✓ Potvrdit",()=>m.onOk());cancel.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";ok.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:900;color:#f87171;background:rgba(239,68,68,.15);border:1px solid #7f1d1d";row.appendChild(cancel);row.appendChild(ok);box.appendChild(row)}
+  // ── PATCHED: foodskip modal ──
+  }else if(m.type==="foodskip"){
+    const ttl=div("","Vynechané jídlo");ttl.style.cssText="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:8px;text-align:center";
+    const msg=div("",`${m.title} bylo vynecháno v ${m.time}.\nJídlo není zapsáno jako snězené a nezapočítává se do kalorií.`);msg.style.cssText="font-size:12px;color:#94a3b8;text-align:center;margin-bottom:20px;line-height:1.5;white-space:pre-wrap";
+    box.appendChild(ttl);box.appendChild(msg);
+    const row=div("");row.style.cssText="display:flex;gap:8px";
+    const back=btn("","Zpět",()=>{S.modal=null;render()});
+    const del=btn("","Zrušit vynechání",()=>{delete S.skips[m.key];save();S.modal=null;render()});
+    back.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";
+    del.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:900;color:#fb7185;background:rgba(127,29,29,.18);border:1px solid #7f1d1d";
+    row.appendChild(back);row.appendChild(del);box.appendChild(row);
+  }else if(m.type==="skip"){
+    const ttl=div("","Vynechaná dávka");ttl.style.cssText="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:8px;text-align:center";
+    const msg=div("",`${m.title} bylo vynecháno v ${m.time}. Nezapočítává se jako příjem a nevytváří zámek.`);msg.style.cssText="font-size:12px;color:#94a3b8;text-align:center;margin-bottom:20px;line-height:1.5";
+    box.appendChild(ttl);box.appendChild(msg);
+    const row=div("");row.style.cssText="display:flex;gap:8px";const back=btn("","Zpět",()=>{S.modal=null;render()});const del=btn("","Zrušit vynechání",()=>{delete S.skips[m.key];save();S.modal=null;render()});back.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";del.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:900;color:#fb7185;background:rgba(127,29,29,.18);border:1px solid #7f1d1d";row.appendChild(back);row.appendChild(del);box.appendChild(row);
+  }else if(m.type==="appcode"){
+    const ttl=div("","📋 Kód celé appky");ttl.style.cssText="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:8px";
+    const info=div("","Tady je aktuální HTML soubor aplikace. Tlačítko ho zkopíruje do schránky.");info.style.cssText="font-size:11px;color:#64748b;margin-bottom:10px;line-height:1.5";
+    const ta=el("textarea");ta.value="<!DOCTYPE html>\n"+document.documentElement.outerHTML;ta.readOnly=true;ta.style.cssText="width:100%;height:180px;background:#020617;color:#94a3b8;border:1px solid #1e293b;border-radius:8px;padding:8px;font-size:10px;resize:none;outline:none;margin-bottom:12px";
+    const copy=btn("","📋 Kopírovat kód",()=>{navigator.clipboard.writeText(ta.value).then(()=>copy.textContent="✅ Kód zkopírován!").catch(()=>{ta.select();document.execCommand("copy");copy.textContent="✅ Kód zkopírován!"})});copy.style.cssText="width:100%;padding:10px;border-radius:8px;background:#0f172a;border:1px solid #1e293b;color:#94a3b8;font-size:11px;font-weight:900;margin-bottom:8px";
+    const close=btn("","Zavřít",()=>{S.modal=null;render()});close.style.cssText="width:100%;padding:10px;border-radius:8px;background:#0f172a;border:1px solid #1e293b;color:#64748b;font-size:11px;font-weight:700";
+    box.appendChild(ttl);box.appendChild(info);box.appendChild(ta);box.appendChild(copy);box.appendChild(close);setTimeout(()=>ta.select(),100);
+  }else if(m.type==="export"||m.type==="import"){
+    const isE=m.type==="export";const ttl=div("",isE?"💾 Záloha dat":"📂 Nahrát zálohu");ttl.style.cssText="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:8px";const info=div("",isE?"Označ vše a zkopíruj do poznámek:":"Vlož zkopírovaný kód zálohy:");info.style.cssText="font-size:11px;color:#64748b;margin-bottom:10px";const ta=el("textarea");ta.value=isE?m.data:"";ta.readOnly=isE;ta.style.cssText="width:100%;height:110px;background:#020617;color:#94a3b8;border:1px solid #1e293b;border-radius:8px;padding:8px;font-size:10px;resize:none;outline:none;margin-bottom:12px";const err=div("");err.style.cssText="font-size:10px;color:#ef4444;margin-bottom:8px;min-height:14px";box.appendChild(ttl);box.appendChild(info);box.appendChild(ta);
+    if(isE){const copy=btn("","📋 Kopírovat do schránky",()=>navigator.clipboard.writeText(m.data).then(()=>copy.textContent="✅ Zkopírováno!").catch(()=>{ta.select();document.execCommand("copy");copy.textContent="✅ Zkopírováno!"}));copy.style.cssText="width:100%;padding:10px;border-radius:8px;background:#0f172a;border:1px solid #1e293b;color:#94a3b8;font-size:11px;font-weight:900;margin-bottom:8px";box.appendChild(copy)}else{box.appendChild(err)}
+    const row=div("");row.style.cssText="display:flex;gap:8px";const close=btn("",isE?"Zavřít":"Zpět",()=>{S.modal=null;render()});close.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";row.appendChild(close);
+    if(!isE){const ok=btn("","✓ Nahrát",()=>{try{const p=JSON.parse(ta.value||"{}");if(p.logs||p.skips||p.foodSwaps){S.logs=p.logs||{};S.skips=p.skips||{};S.foodSwaps=p.foodSwaps||{}}else{S.logs=p;S.skips={}}save();S.modal=null;render()}catch(e){err.textContent="⚠ Neplatný formát — zkontroluj kód"}});ok.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:900;color:#4ade80;background:rgba(5,46,22,.4);border:1px solid #14532d";row.appendChild(ok)}
+    box.appendChild(row);setTimeout(()=>ta.select(),100);
+  }else{
+    const lbl=div("","NUTRI OS / STROJ ČASU");lbl.style.cssText="font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#374151;margin-bottom:12px;text-align:center";box.appendChild(lbl);
+    const ttl=div("",m.title);ttl.style.cssText="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:16px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";box.appendChild(ttl);
+    let[h,min]=m.time.split(":").map(Number);const td=div("",m.time);td.style.cssText="font-size:36px;font-weight:900;color:#fff;min-width:110px;text-align:center";const upd=()=>{m.time=String(h).padStart(2,"0")+":"+String(min).padStart(2,"0");td.textContent=m.time};
+    const picker=div("");picker.style.cssText="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:20px;background:#0f172a;padding:16px;border-radius:16px;border:1px solid #1e293b";
+    const cH=div("");cH.style.cssText="display:flex;flex-direction:column;gap:8px";cH.appendChild(btn("","▲",()=>{h=(h+1)%24;upd()}));cH.appendChild(btn("","▼",()=>{h=(h+23)%24;upd()}));
+    const cM=div("");cM.style.cssText="display:flex;flex-direction:column;gap:8px";cM.appendChild(btn("","▲",()=>{min=(min+1)%60;upd()}));cM.appendChild(btn("","▼",()=>{min=(min+59)%60;upd()}));
+    [...cH.children,...cM.children].forEach(b=>b.style.cssText=`color:${S.theme.hex};font-size:20px;font-weight:900;padding:8px 16px;background:rgba(255,255,255,.05);border-radius:8px`);
+    picker.appendChild(cH);picker.appendChild(td);picker.appendChild(cM);box.appendChild(picker);
+    const saveB=btn("","ULOŽIT OPRAVENÝ ČAS",()=>{let mAbs=t2m(m.time),cs=slots.length?slots[0].absBase:0;if(mAbs<cs)mAbs+=1440;S.logs[m.key]=Object.assign({},S.logs[m.key]||{},{time:mAbs,timeStr:m.time,isManual:true});save();S.modal=null;render()});
+    saveB.style.cssText=`width:100%;padding:14px;border-radius:12px;font-size:12px;font-weight:900;color:#fff;background:${S.theme.hex};margin-bottom:10px;letter-spacing:.05em`;box.appendChild(saveB);
+    const row=div("");row.style.cssText="display:flex;gap:8px";const back=btn("","Zpět",()=>{S.modal=null;render()});const del=btn("","Vymazat",()=>{delete S.logs[m.key];save();S.modal=null;render()});back.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";del.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:900;color:#f87171;background:rgba(239,68,68,.1);border:1px solid #7f1d1d";row.appendChild(back);row.appendChild(del);box.appendChild(row);
+  }
+  ov.appendChild(box);wrap.appendChild(ov);
+}
+
+setInterval(()=>{if(!S.manualTime){S.now=new Date();render()}},5000);
+window.addEventListener("pagehide",save);
+window.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")save()});
+S._scrollToCurrent=true;
+render();
+hydrateFallbackState();
+</script>
+</body></html>
