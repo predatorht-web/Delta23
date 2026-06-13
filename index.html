@@ -280,20 +280,76 @@ const S={
   const resetTimeStr=WEEKS[S.activeWeek].resetTime||sched[0].timeStart||sched[0].time||"00:00";
   const cycleStartMin=t2m(resetTimeStr),now=new Date(),nowMin=now.getHours()*60+now.getMinutes(),cd=new Date(now);
   if(nowMin<cycleStartMin)cd.setDate(cd.getDate()-1);
-  const cycleKey=cd.toISOString().slice(0,10)+"_"+sched[0].id;
+
+  // Speciální případ: Noční (A) v pátek → přepni na Volno ve 20:00
+  const dow=now.getDay(); // 0=Ne,1=Po,...,5=Pá,6=So
+  const isFridayNoční=(dow===5 && S.activeWeek==="A" && nowMin>=t2m("20:00"));
+  
+  // Pro Volno přepnutí použijeme speciální cycleKey
+  const cycleKey=isFridayNoční
+    ? cd.toISOString().slice(0,10)+"_VOLNO_PATEK"
+    : cd.toISOString().slice(0,10)+"_"+sched[0].id;
+
   if(STORE.getItem("nos_last_cycle")!==cycleKey){
-    // Auto-backup před resetem
     const backupData=JSON.stringify({logs:S.logs,skips:S.skips,foodSwaps:S.foodSwaps});
     const hasData=Object.keys(S.logs).length>0||Object.keys(S.skips).length>0;
     if(hasData){
-      // Uložíme zálohu do localStorage jako "včerejšek"
       STORE.setItem("nos_yesterday_data",backupData);
       STORE.setItem("nos_yesterday_week",S.activeWeek);
       STORE.setItem("nos_yesterday_date",cd.toISOString().slice(0,10));
-      // Pokus o cloud backup (fire and forget)
       try{fetch(CLOUD_WEBHOOK,{method:"POST",body:JSON.stringify({typ:"data",data:backupData}),mode:"no-cors"}).catch(()=>{})}catch(e){}
     }
-    S.logs={};S.skips={};S.foodSwaps={};STORE.setItem("nos_logs","{}");STORE.setItem("nos_skips","{}");STORE.setItem("nos_fswaps","{}");
+
+    if(isFridayNoční){
+      // Pátek 20:00 → přepni Noční na Volno
+      STORE.setItem("nos_pre_volno_shift","A");
+      S.activeWeek="V"; S.week="V";
+      STORE.setItem("nos_active_week","V"); STORE.setItem("nos_week","V");
+    } else {
+      // Standardní 00:00 reset
+      const newCycleDate=new Date(cd);newCycleDate.setDate(newCycleDate.getDate()+1);
+      const dow2=newCycleDate.getDay();
+      const cur=S.activeWeek;
+
+      // Pátek 00:00 → Volno (pro B a C)
+      if(dow2===5 && ["B","C"].includes(cur)){
+        STORE.setItem("nos_pre_volno_shift",cur);
+        S.activeWeek="V"; S.week="V";
+        STORE.setItem("nos_active_week","V"); STORE.setItem("nos_week","V");
+      }
+      // Pondělí 00:00 → z Volna (po B)
+      else if(dow2===1 && cur==="V"){
+        const pre=STORE.getItem("nos_pre_volno_shift")||"B";
+        if(pre!=="C"){
+          const seq=["A","B","C"],idx=seq.indexOf(pre);
+          const next=seq[(idx+1)%3];
+          S.activeWeek=next; S.week=next;
+          STORE.setItem("nos_active_week",next); STORE.setItem("nos_week",next);
+        }
+      }
+      // Neděle 00:00 → Noční (po Ranní C)
+      else if(dow2===0 && cur==="V"){
+        const pre=STORE.getItem("nos_pre_volno_shift")||"";
+        if(pre==="C"){
+          S.activeWeek="A"; S.week="A";
+          STORE.setItem("nos_active_week","A"); STORE.setItem("nos_week","A");
+        }
+      }
+      // Ostatní dny → kotva rotace A→B→C
+      else if(["A","B","C"].includes(cur)){
+        const ts=STORE.getItem("nos_anchor_ts"),sh=STORE.getItem("nos_anchor_shift");
+        if(ts&&sh){
+          const m2=new Date(active);m2.setHours(0,0,0,0);const d2=m2.getDay()||7;m2.setDate(m2.getDate()-d2+1);
+          const diffW=Math.round((m2.getTime()-parseInt(ts))/(1000*60*60*24*7));
+          const seq=["A","B","C"],idx=seq.indexOf(sh);
+          if(idx>-1){let nI=(idx+diffW)%3;if(nI<0)nI+=3;const cs=seq[nI];
+            if(S.activeWeek!==cs){const old=S.activeWeek;S.activeWeek=cs;STORE.setItem("nos_active_week",cs);if(S.week===old){S.week=cs;STORE.setItem("nos_week",cs);}}}
+        }
+      }
+    }
+
+    S.logs={};S.skips={};S.foodSwaps={};
+    STORE.setItem("nos_logs","{}");STORE.setItem("nos_skips","{}");STORE.setItem("nos_fswaps","{}");
   }
   STORE.setItem("nos_last_cycle",cycleKey);
 })();
@@ -353,35 +409,19 @@ function tryLog(s, bioNow, callback){
 function computeEngine(){
   const active=S.manualTime||S.now,rawNowMin=active.getHours()*60+active.getMinutes();
   
+  // Inicializace kotvy pokud chybí
   let ts = STORE.getItem("nos_anchor_ts");
   let sh = STORE.getItem("nos_anchor_shift");
-  
   if((!ts || !sh) && ["A","B","C"].includes(S.activeWeek)){
     const realNow = S.now;
     const day = realNow.getDay() || 7;
     const m = new Date(realNow); m.setHours(0,0,0,0); m.setDate(m.getDate() - day + 1);
-    ts = m.getTime();
-    sh = S.activeWeek;
-    STORE.setItem("nos_anchor_ts", ts);
-    STORE.setItem("nos_anchor_shift", sh);
+    ts = m.getTime(); sh = S.activeWeek;
+    STORE.setItem("nos_anchor_ts", ts); STORE.setItem("nos_anchor_shift", sh);
   }
 
-  if(ts && sh && ["A","B","C"].includes(S.activeWeek)){
-    const day = active.getDay() || 7;
-    const m = new Date(active); m.setHours(0,0,0,0); m.setDate(m.getDate() - day + 1);
-    const diffWeeks = Math.round((m.getTime() - parseInt(ts)) / (1000 * 60 * 60 * 24 * 7));
-    const seq = ["A", "B", "C"], idx = seq.indexOf(sh);
-    if(idx > -1){
-      let nIdx = (idx + diffWeeks) % 3; if(nIdx < 0) nIdx += 3;
-      const calcShift = seq[nIdx];
-      if(S.activeWeek !== calcShift){
-        const oldActive = S.activeWeek;
-        S.activeWeek = calcShift; 
-        STORE.setItem("nos_active_week", calcShift);
-        if(S.week === oldActive){ S.week = calcShift; STORE.setItem("nos_week", calcShift); }
-      }
-    }
-  }
+  // Páteční zámek okna A_SWAP_EVE
+  const isFridayA=(active.getDay()===5 && S.week==="A");
 
   const baseSched=JSON.parse(JSON.stringify(WEEKS[S.week].schedule)),isActiveWeek=S.week===S.activeWeek;
   if(!baseSched.length)return{slots:[],currentIdx:-1,locks:[],bioNow:rawNowMin,isActiveWeek};
@@ -436,6 +476,8 @@ function computeEngine(){
   lastCalcium=-Infinity;lastWhey=-Infinity;lastTaurin=-Infinity;lastMeat=-Infinity;
   for(const s of baseSched){
     const isWS=s.type==="work"||s.type==="sleep"||s.type==="info",isBranch=s.type==="branch";
+    // Páteční zámek okna A_SWAP_EVE
+    s.fridayLocked=(isFridayA && s.id==="A_SWAP_EVE");
     const prev={calcium:lastCalcium,whey:lastWhey,taurin:lastTaurin,meat:lastMeat};
     let done=0,closed=0,maxLog=null;
     s.supls.forEach(x=>{const lk=suplKey(s,x),sk=skipKey(s,x),lg=S.logs[lk];if(lg){done++;closed++;if(!maxLog||lg.time>maxLog)maxLog=lg.time}else if(S.skips[sk])closed++});
@@ -594,6 +636,35 @@ function render(){
     wRow.appendChild(b);
   });
   wrap.appendChild(wRow);
+
+  // ── INFO O PŘÍŠTÍM PŘEPNUTÍ ──
+  {
+    const now2=S.manualTime||S.now;
+    const dow=now2.getDay(); // 0=Ne,1=Po,2=Út,3=St,4=Čt,5=Pá,6=So
+    const cur=S.activeWeek;
+    let nextMsg=null;
+    if(["A","B","C"].includes(cur)){
+      // Kolik dní do pátku?
+      const daysToFri=((5-dow+7)%7)||7;
+      nextMsg=`⏭ Přepnutí na Volno za ${daysToFri===1?"1 den":daysToFri+" dní"} (pátek 00:00)`;
+    }else if(cur==="V"){
+      const pre=STORE.getItem("nos_pre_volno_shift")||"?";
+      if(pre==="C"){
+        const daysToSun=((0-dow+7)%7)||7;
+        nextMsg=`⏭ Přepnutí na Noční za ${daysToSun===1?"1 den":daysToSun+" dní"} (neděle 00:00)`;
+      }else{
+        const daysToMon=((1-dow+7)%7)||7;
+        const seq=["A","B","C"],idx=seq.indexOf(pre);
+        const next=seq[(idx+1)%3];
+        nextMsg=`⏭ Přepnutí na ${WEEK_LABELS[next]} za ${daysToMon===1?"1 den":daysToMon+" dní"} (pondělí 00:00)`;
+      }
+    }
+    if(nextMsg){
+      const infoEl=div("",nextMsg);
+      infoEl.style.cssText="text-align:center;font-size:9px;font-weight:700;color:#374151;letter-spacing:.05em;padding:0 12px 10px;max-width:480px;margin:0 auto";
+      wrap.appendChild(infoEl);
+    }
+  }
 
   if(!isActiveWeek){
     const aWrap=div("");aWrap.style.cssText="padding:0 12px 16px;max-width:480px;margin:0 auto";
@@ -757,9 +828,15 @@ function renderNow(content,slots,currentIdx,locks,bioNow,isActiveWeek,nowStr){
       if(S.expandedWhy[s.id]){const wb2=div("zion-why-text",s.why);const more=btn("","Číst víc v Kodexu",()=>openCodex(codexTargetFor(s)));more.style.cssText="display:block;margin-top:8px;padding:7px 10px;border-radius:8px;background:#0f172a;border:1px solid #1e293b;color:"+S.theme.hex+";font-size:10px;font-weight:900";wb2.appendChild(more);left.appendChild(wb2)}
     }
     const right=div("");right.style.cssText="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0";
-    s.supls.forEach(x=>renderInlineSuplButton(right,s,x,bioNow,nowStr,isMissed));
-    s.foods.forEach(x=>renderInlineFoodButton(right,s,x,bioNow,nowStr,isMissed));
-    if(s.type==="branch")renderBranch(right,s,bioNow,nowStr);
+    if(s.fridayLocked){
+      const lockMsg=div("","🔒 Přesunuto na 20:00 → Volno");
+      lockMsg.style.cssText="font-size:10px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);padding:6px 10px;border-radius:8px;text-align:center";
+      right.appendChild(lockMsg);
+    } else {
+      s.supls.forEach(x=>renderInlineSuplButton(right,s,x,bioNow,nowStr,isMissed));
+      s.foods.forEach(x=>renderInlineFoodButton(right,s,x,bioNow,nowStr,isMissed));
+      if(s.type==="branch")renderBranch(right,s,bioNow,nowStr);
+    }
     row.appendChild(left);row.appendChild(right);card.appendChild(row);nodeWrap.appendChild(card);tWrap.appendChild(nodeWrap);
   });
   content.appendChild(tWrap);
