@@ -301,11 +301,13 @@ const S={
     }
 
     if(isFridayNoční){
-      // Pátek 20:00 → přepni Noční na Volno
+      // Pátek 20:00 → přepni Noční na Volno, označ že cyklus začíná od 20:00
       STORE.setItem("nos_pre_volno_shift","A");
+      STORE.setItem("nos_volno_patek","1"); // flag: tento cyklus Volna začal v pátek ve 20:00
       S.activeWeek="V"; S.week="V";
       STORE.setItem("nos_active_week","V"); STORE.setItem("nos_week","V");
     } else {
+      STORE.removeItem("nos_volno_patek"); // normální cyklus Volna — flag smaž
       // Standardní 00:00 reset
       const newCycleDate=new Date(cd);newCycleDate.setDate(newCycleDate.getDate()+1);
       const dow2=newCycleDate.getDay();
@@ -424,6 +426,14 @@ function computeEngine(){
   const isFridayA=(active.getDay()===5 && S.week==="A");
 
   const baseSched=JSON.parse(JSON.stringify(WEEKS[S.week].schedule)),isActiveWeek=S.week===S.activeWeek;
+  
+  // Páteční Volno — zobraz jen od V_SWAP_NIGHT (20:00) dál
+  const isVolnoPatek=(S.week==="V" && STORE.getItem("nos_volno_patek")==="1");
+  if(isVolnoPatek){
+    const startIdx=baseSched.findIndex(s=>s.id==="V_SWAP_NIGHT");
+    if(startIdx>0)baseSched.splice(0,startIdx);
+  }
+  
   if(!baseSched.length)return{slots:[],currentIdx:-1,locks:[],bioNow:rawNowMin,isActiveWeek};
   let offset=0,prev=-1;
   baseSched.forEach(s=>{
