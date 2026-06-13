@@ -294,8 +294,8 @@ const S={
     const backupData=JSON.stringify({logs:S.logs,skips:S.skips,foodSwaps:S.foodSwaps});
     const hasData=Object.keys(S.logs).length>0||Object.keys(S.skips).length>0;
     const todayStr=cd.toISOString().slice(0,10);
-    // Backup jen pokud ještě nebyl uložen pro tento datum a tuto směnu
-    const alreadyBacked=STORE.getItem("nos_yesterday_date")===todayStr && STORE.getItem("nos_yesterday_week")===S.activeWeek;
+    // Backup jen pokud ještě nebyl uložen pro tento datum (bez ohledu na směnu)
+    const alreadyBacked=STORE.getItem("nos_yesterday_date")===todayStr;
     if(hasData && !alreadyBacked){
       STORE.setItem("nos_yesterday_data",backupData);
       STORE.setItem("nos_yesterday_week",S.activeWeek);
@@ -868,6 +868,12 @@ function renderNow(content,slots,currentIdx,locks,bioNow,isActiveWeek,nowStr){
 }
 
 function renderDay(content,slots,currentIdx,bioNow){
+  // Páteční Volno — v kartě Den také ořízni uzly před 20:00
+  const isVolnoPatekDay=(S.week==="V" && STORE.getItem("nos_volno_patek")==="1");
+  if(isVolnoPatekDay){
+    const startIdx=slots.findIndex(s=>s.id==="V_SWAP_NIGHT");
+    if(startIdx>0)slots=slots.slice(startIdx);
+  }
   // Yesterday toggle - vždy viditelné
   const yesterdayData=STORE.getItem("nos_yesterday_data");
   const yesterdayDate=STORE.getItem("nos_yesterday_date");
