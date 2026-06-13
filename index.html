@@ -134,7 +134,7 @@ body::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events
 <script>
 "use strict";
 const SUPL_COLORS={"Taurin":"#f97316","Ca+Mg+Zn":"#3b82f6","D3+K2":"#eab308","Mg+B6":"#22c55e"};
-const APP_VERSION="NUTRI OS V5.4";
+const APP_VERSION="NUTRI OS V5.5";
 const TAURIN_FAST_MIN=45,CALCIUM_LOCK_MIN=150,WHEY_LOCK_MIN=45,MEAT_TO_CHEESE_MIN=90,MEAT_TO_EMPTY_SUPL_MIN=120;
 const THEMES=[
   {id:"blue",  hex:"#3b82f6", rgb:"59,130,246",  bg:"#030712", bgRgb:"3,7,18",    panel:"rgba(59,130,246,.09)"},
@@ -222,9 +222,10 @@ const CODEX=[
   {id:"cheese-lock",icon:"🧀",title:"PROČ SÝR = NEPŘÍTEL",text:"Sýr je problém kvůli vysokému vápníku, kaseinu a tuku. Směrem dopředu proti zinku a hořčíku tvoří pomalou deku. D3+K2 se naopak k sýru hodí okamžitě, protože jsou rozpustné v tucích.",bg:"rgba(127,29,29,.42)",border:"#ef4444",color:"#fca5a5"},
   {id:"stomach-filter",icon:"🧪",title:"V7: ŽALUDEK NENÍ MÍCHAČKA",text:"Starý strach, že se maso, rýže, zinek a pozdější sýr v žaludku celé hodiny míchají, je pro čistý protokol zastaralý. Žaludek funguje jako filtr: tekutiny a rozpuštěný zinek odcházejí rychle, pevné maso zůstává déle.",bg:"rgba(8,47,73,.5)",border:"#0284c7",color:"#7dd3fc"},
   {id:"fast-track",icon:"⏱",title:"V7: FAST-TRACK 60-90 MIN",text:"Maso/Rýže + Zinek → Sýr/Lípánek: sweet spot je 60-90 minut. 30 minut je málo, protože pilulka se teprve rozpouští. Po 60 minutách už zinek bezpečně podteče do střeva; 90 minut je klidná rezerva.",bg:"rgba(69,26,3,.46)",border:"#f59e0b",color:"#fbbf24"},
-  {id:"double-shot",icon:"🥩",title:"V6/V7: DOUBLE SHOT",text:"Dvě porce masa s krátkou pauzou ber jako jeden trávicí blok. Legacy daň 3 hodiny se ruší: sýr nebo Lípánek lze nasadit 60-90 minut od dojedení druhé porce, pokud zinek šel s první porcí a měl náskok.",bg:"rgba(30,41,59,.5)",border:"#64748b",color:"#cbd5e1"},
-  {id:"final-a",icon:"🟦",title:"FINÁLNÍ OSA TÝDEN A",text:"06:15 Mg+B6 + Taurin; 07:00 Sýr I.; 08:00 Spánek; 14:15 Budíček + Taurin; 15:00 Maso/Rýže 1/2 + Zinek; 17:00 Maso/Rýže 2/2; 18:00-19:30 Sýr II+III + D3+K2 + případný Lípánek; 20:00 konec příjmu potravy.",bg:"rgba(30,58,138,.34)",border:"#3b82f6",color:"#93c5fd"}
+  {id:"double-shot",icon:"🥩",title:"V6/V7: DOUBLE SHOT",text:"Dvě porce masa s krátkou pauzou ber jako jeden trávicí blok. Legacy daň 3 hodiny se ruší: sýr nebo Lípánek lze nasadit 60-90 minut od dojedení druhé porce, pokud zinek šel s první porcí a měl náskok.",bg:"rgba(30,41,59,.5)",border:"#64748b",color:"#cbd5e1"}
 ];
+
+const WEEK_LABELS={A:"Noční",B:"Odpolední",C:"Ranní",V:"Volno"};
 
 function t2m(t){if(!t)return 0;const[h,m]=t.split(":").map(Number);return h*60+m}
 function m2t(m){let x=Math.floor(m)%1440;if(x<0)x+=1440;return String(Math.floor(x/60)).padStart(2,"0")+":"+String(x%60).padStart(2,"0")}
@@ -270,7 +271,8 @@ const S={
   intensity:parseFloat(STORE.getItem("nos_intensity")||"0.18"),
   tab:"now",
   logs:loadJson("nos_logs",{}),skips:loadJson("nos_skips",{}),foodSwaps:loadJson("nos_fswaps",{}),
-  manualTime:null,expandedWhy:{},modal:null,now:new Date(),autoScroll:true
+  myColors:loadJson("nos_mycolors",{}),myColorsMode:STORE.getItem("nos_mycolors_mode")==="1",
+  manualTime:null,expandedWhy:{},modal:null,now:new Date(),autoScroll:true,_dayView:"dnes",_nowView:"dnes"
 };
 
 (function(){
@@ -279,7 +281,20 @@ const S={
   const cycleStartMin=t2m(resetTimeStr),now=new Date(),nowMin=now.getHours()*60+now.getMinutes(),cd=new Date(now);
   if(nowMin<cycleStartMin)cd.setDate(cd.getDate()-1);
   const cycleKey=cd.toISOString().slice(0,10)+"_"+sched[0].id;
-  if(STORE.getItem("nos_last_cycle")!==cycleKey){S.logs={};S.skips={};S.foodSwaps={};STORE.setItem("nos_logs","{}");STORE.setItem("nos_skips","{}");STORE.setItem("nos_fswaps","{}")}
+  if(STORE.getItem("nos_last_cycle")!==cycleKey){
+    // Auto-backup před resetem
+    const backupData=JSON.stringify({logs:S.logs,skips:S.skips,foodSwaps:S.foodSwaps});
+    const hasData=Object.keys(S.logs).length>0||Object.keys(S.skips).length>0;
+    if(hasData){
+      // Uložíme zálohu do localStorage jako "včerejšek"
+      STORE.setItem("nos_yesterday_data",backupData);
+      STORE.setItem("nos_yesterday_week",S.activeWeek);
+      STORE.setItem("nos_yesterday_date",cd.toISOString().slice(0,10));
+      // Pokus o cloud backup (fire and forget)
+      try{fetch(CLOUD_WEBHOOK,{method:"POST",body:JSON.stringify({typ:"data",data:backupData}),mode:"no-cors"}).catch(()=>{})}catch(e){}
+    }
+    S.logs={};S.skips={};S.foodSwaps={};STORE.setItem("nos_logs","{}");STORE.setItem("nos_skips","{}");STORE.setItem("nos_fswaps","{}");
+  }
   STORE.setItem("nos_last_cycle",cycleKey);
 })();
 
@@ -287,6 +302,8 @@ function save(){
   STORE.setItem("nos_logs",JSON.stringify(S.logs));STORE.setItem("nos_skips",JSON.stringify(S.skips));STORE.setItem("nos_fswaps",JSON.stringify(S.foodSwaps));
   STORE.setItem("nos_week",S.week);STORE.setItem("nos_active_week",S.activeWeek);STORE.setItem("nos_theme",S.theme.id);
   STORE.setItem("nos_intensity",String(S.intensity));
+  STORE.setItem("nos_mycolors",JSON.stringify(S.myColors));
+  STORE.setItem("nos_mycolors_mode",S.myColorsMode?"1":"0");
 }
 function setCSS(){
   const r=document.documentElement,b=document.body;
@@ -296,6 +313,9 @@ function setCSS(){
   r.style.setProperty("--accent-alpha", S.theme.hex+"44");
   b.style.background="#000";
 }
+// ── MY COLORS helper ──
+function getColor(key,defaultColor){return S.myColorsMode&&S.myColors[key]?S.myColors[key]:defaultColor}
+
 function suplKey(s,x){return S.week+"_"+s.id+"_supl_"+x.name}
 function skipKey(s,x){return S.week+"_"+s.id+"_skip_supl_"+x.name}
 // ── NEW: food skip key ──
@@ -311,7 +331,7 @@ function codexTargetFor(s){
   if(s.supls.some(x=>x.name==="Ca+Mg+Zn"))return"meat-zinc";
   if(s.supls.some(x=>x.name==="D3+K2"))return"cheese-lock";
   if(s.type==="branch")return"lipanek";
-  if(S.week==="A")return"final-a";
+  if(S.week==="A")return"double-shot";
   return"calcium-zinc";
 }
 function openCodex(target){S.tab="codex";S.codexTarget=target;render()}
@@ -500,6 +520,19 @@ function render(){
     d.addEventListener("click",()=>{S.theme=t;save();render()});
     tPalette.appendChild(d);
   });
+  // Custom color picker dot - opens modal palette
+  const cpDot=div("zion-dot"+(S.theme.id==="custom"?" active":""));
+  const customColors=["#ef4444","#f97316","#f59e0b","#eab308","#84cc16","#22c55e","#10b981","#14b8a6","#06b6d4","#3b82f6","#6366f1","#8b5cf6","#a855f7","#d946ef","#ec4899","#f43f5e","#ffffff","#94a3b8","#64748b","#334155"];
+  const currentCustom=S.theme.id==="custom"?S.theme.hex:null;
+  cpDot.style.setProperty("--dot-color",currentCustom||"#888");
+  cpDot.style.background=currentCustom||"conic-gradient(#f43f5e,#f97316,#eab308,#22c55e,#3b82f6,#a855f7,#f43f5e)";
+  cpDot.title="vlastní barva";
+  cpDot.addEventListener("click",()=>{S.modal={type:"colorpicker"};render()});
+  tPalette.appendChild(cpDot);
+  // My Colors button - otevře rovnou modal editor
+  const mcBtn=btn("","🎨 "+(S.myColorsMode?"MY COLORS ●":"MY COLORS"),()=>{S.modal={type:"mycolors"};render()});
+  mcBtn.style.cssText=`font-size:9px;font-weight:900;padding:4px 10px;border-radius:6px;border:1px solid ${S.myColorsMode?`rgba(${S.theme.rgb},.5)`:"rgba(255,255,255,.25)"};background:${S.myColorsMode?`rgba(${S.theme.rgb},.15)`:"rgba(255,255,255,.06)"};color:${S.myColorsMode?S.theme.hex:"rgba(255,255,255,.7)"}`;
+  tPalette.appendChild(mcBtn);
   tEngine.appendChild(tPalette);
   
   const tTune=div("zion-tune");
@@ -550,9 +583,14 @@ function render(){
   const wRow=div("");wRow.style.cssText="display:flex;gap:6px;padding:0 12px 16px;max-width:480px;margin:0 auto";
   Object.entries(WEEKS).forEach(([k,v])=>{
     const isView=S.week===k,isActual=S.activeWeek===k;
-    const b=btn("week-btn"+(isView?" active":""),v.emoji+" "+k,()=>{S.week=k;save();render()});
-    if(isView)b.style.background=S.theme.panel;
-    if(isActual)b.innerHTML=v.emoji+" "+k+`<span style="color:${S.theme.hex};font-size:12px;margin-left:2px">●</span>`;
+    const b=btn("",WEEK_LABELS[k],()=>{S.week=k;save();render()});
+    if(isActual){const dot=document.createTextNode(" ●");b.appendChild(dot)}
+    if(isView){
+      b.style.cssText=`flex:1;padding:8px 4px;font-size:10px;font-weight:900;letter-spacing:.04em;border-radius:10px;background:rgba(${S.theme.rgb},.2);border:1px solid rgba(${S.theme.rgb},.55);color:#fff;box-shadow:0 0 14px rgba(${S.theme.rgb},.2);transition:all .18s`;
+    }else{
+      b.style.cssText="flex:1;padding:8px 4px;font-size:10px;font-weight:900;letter-spacing:.04em;border-radius:10px;background:#000;border:1px solid rgba(255,255,255,.35);color:#fff;transition:all .18s";
+    }
+    if(isActual&&!isView){b.style.color=S.theme.hex}
     wRow.appendChild(b);
   });
   wrap.appendChild(wRow);
@@ -602,6 +640,64 @@ function render(){
 }
 
 function renderNow(content,slots,currentIdx,locks,bioNow,isActiveWeek,nowStr){
+  // Dnes/Včera přepínač
+  const yesterdayData=STORE.getItem("nos_yesterday_data");
+  const yesterdayDate=STORE.getItem("nos_yesterday_date");
+  const yesterdayWeek=STORE.getItem("nos_yesterday_week");
+  const isDnes=S._nowView!=="vcera";
+  const togRow=div("");togRow.style.cssText="display:flex;gap:6px;margin-bottom:12px";
+  const bDnes=btn("","Dnes",()=>{S._nowView="dnes";render()});
+  const bVcera=btn("","Včera"+(yesterdayDate?" ("+yesterdayDate+")":""),()=>{S._nowView="vcera";render()});
+  bDnes.style.cssText=`flex:1;padding:7px;border-radius:9px;font-size:11px;font-weight:900;${isDnes?`background:rgba(${S.theme.rgb},.18);border:1px solid rgba(${S.theme.rgb},.45);color:#fff`:"background:#000;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7)"}`;
+  bVcera.style.cssText=`flex:1;padding:7px;border-radius:9px;font-size:11px;font-weight:900;${!isDnes?`background:rgba(${S.theme.rgb},.18);border:1px solid rgba(${S.theme.rgb},.45);color:#fff`:"background:#000;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7)"}`;
+  togRow.appendChild(bDnes);togRow.appendChild(bVcera);
+  content.appendChild(togRow);
+
+  if(!isDnes){
+    if(!yesterdayData){
+      const empty=div("");empty.style.cssText="text-align:center;padding:40px 20px";
+      empty.innerHTML=`<div style="font-size:32px;margin-bottom:12px">📭</div><div style="font-size:13px;font-weight:700;color:#4b5563">Žádná data pro včerejšek</div><div style="font-size:11px;color:#374151;margin-top:6px">Uloží se automaticky při dalším resetu cyklu</div>`;
+      content.appendChild(empty);return;
+    }
+    const yd=JSON.parse(yesterdayData);
+    const yweek=yesterdayWeek||S.week;
+    const ysched=WEEKS[yweek]?WEEKS[yweek].schedule:[];
+    const info=div("","📋 READONLY · "+WEEK_LABELS[yweek]+" · "+yesterdayDate);
+    info.style.cssText="font-size:10px;font-weight:900;color:#475569;letter-spacing:.06em;margin-bottom:10px;text-align:center";
+    content.appendChild(info);
+    const yWrap=div("");yWrap.style.cssText="position:relative;padding-left:28px;opacity:.8";
+    yWrap.appendChild(div("timeline-line"));
+    ysched.forEach(s=>{
+      const nodeWrap=div("");nodeWrap.style.marginBottom="10px";
+      const card=div("zion-node-card");
+      card.style.opacity="0.75";
+      const left=div("");left.style.cssText="flex:1;min-width:0";
+      const tSpan=el("span","",s.timeStart||s.time||"");tSpan.style.cssText="font-size:12px;font-weight:700;color:rgba(255,255,255,.3);display:block;margin-bottom:3px";
+      const title=el("h3","",s.label);title.style.cssText="font-size:14px;font-weight:700;color:rgba(255,255,255,.6)";
+      left.appendChild(tSpan);left.appendChild(title);
+      // Status z včerejších dat
+      const right=div("");right.style.cssText="display:flex;flex-direction:column;gap:3px;align-items:flex-end;flex-shrink:0";
+      s.supls.forEach(x=>{
+        const lk=yweek+"_"+s.id+"_supl_"+x.name;
+        const lg=yd.logs[lk];const sk=yweek+"_"+s.id+"_skip_supl_"+x.name;const sp=yd.skips&&yd.skips[sk];
+        const b=div("",lg?"✅ "+x.name+" ("+lg.timeStr+")":sp?"⏭ "+x.name:x.name);
+        b.style.cssText=`font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;${lg?"background:rgba(5,46,22,.5);color:#4ade80":sp?"color:#fb7185":"color:#374151;background:rgba(0,0,0,.3)"}`;
+        right.appendChild(b);
+      });
+      s.foods.forEach(x=>{
+        const lk=yweek+"_"+s.id+"_food_"+x.name;
+        const lg=yd.logs[lk];const fsk=yweek+"_"+s.id+"_skip_food_"+x.name;const sp=yd.skips&&yd.skips[fsk];
+        const swapKey=yweek+"_"+s.id+"_swap_"+x.name;const isSwapped=x.swappable&&yd.foodSwaps&&yd.foodSwaps[swapKey];const eff=isSwapped?x.swapWith:x;
+        const b=div("",lg?"✅ "+eff.name:sp?"⏭ "+eff.name:eff.name);
+        b.style.cssText=`font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;${lg?"background:rgba(5,46,22,.5);color:#4ade80":sp?"color:#fb7185":"color:#374151;background:rgba(0,0,0,.3)"}`;
+        right.appendChild(b);
+      });
+      const rw=div("");rw.style.cssText="display:flex;justify-content:space-between;align-items:flex-start;gap:12px";
+      rw.appendChild(left);rw.appendChild(right);card.appendChild(rw);nodeWrap.appendChild(card);yWrap.appendChild(nodeWrap);
+    });
+    content.appendChild(yWrap);return;
+  }
+
   locks.forEach(l=>{const bx=div("zion-lock-panel");bx.style.borderColor=l.type==="calcium"?"#ef4444":"#f59e0b";bx.style.background=l.type==="calcium"?"rgba(239,68,68,.15)":"rgba(245,158,11,.15)";bx.appendChild(div("lock-text",l.msg));content.appendChild(bx)});
   if(!isActiveWeek){const p=div("zion-alert-box","👀 REŽIM NÁHLEDU (Číst pouze)");p.style.cssText="background:#1e293b;color:#94a3b8;text-align:center;font-weight:900;letter-spacing:.05em";content.appendChild(p)}
   const tWrap=div("");tWrap.id="now-wrap";tWrap.style.cssText="position:relative;padding-left:28px";
@@ -682,6 +778,48 @@ function renderNow(content,slots,currentIdx,locks,bioNow,isActiveWeek,nowStr){
 }
 
 function renderDay(content,slots,currentIdx,bioNow){
+  // Yesterday toggle - vždy viditelné
+  const yesterdayData=STORE.getItem("nos_yesterday_data");
+  const yesterdayDate=STORE.getItem("nos_yesterday_date");
+  const yesterdayWeek=STORE.getItem("nos_yesterday_week");
+  const togWrap=div("");togWrap.style.cssText="display:flex;gap:6px;margin-bottom:12px";
+  const isDnes=S._dayView!=="vcera";
+  const btnDnes=btn("","Dnes",()=>{S._dayView="dnes";render()});
+  const btnVcera=btn("","Včera"+(yesterdayDate?" ("+yesterdayDate+")":""),()=>{S._dayView="vcera";render()});
+  btnDnes.style.cssText=`flex:1;padding:8px;border-radius:9px;font-size:11px;font-weight:900;${isDnes?`background:rgba(${S.theme.rgb},.18);border:1px solid rgba(${S.theme.rgb},.45);color:#fff`:"background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4)"}`;
+  btnVcera.style.cssText=`flex:1;padding:8px;border-radius:9px;font-size:11px;font-weight:900;${!isDnes?`background:rgba(${S.theme.rgb},.18);border:1px solid rgba(${S.theme.rgb},.45);color:#fff`:"background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4)"}`;
+  togWrap.appendChild(btnDnes);togWrap.appendChild(btnVcera);
+  content.appendChild(togWrap);
+
+  if(!isDnes){
+    if(!yesterdayData){
+      const empty=div("");empty.style.cssText="text-align:center;padding:40px 20px;color:#374151";
+      empty.innerHTML=`<div style="font-size:32px;margin-bottom:12px">📭</div><div style="font-size:13px;font-weight:700;color:#4b5563">Žádná data pro včerejšek</div><div style="font-size:11px;color:#374151;margin-top:6px">Data se uloží automaticky při dalším resetu cyklu</div>`;
+      content.appendChild(empty);return;
+    }
+    const yd=JSON.parse(yesterdayData);
+    const yweek=yesterdayWeek||S.week;
+    const ysched=WEEKS[yweek]?WEEKS[yweek].schedule:[];
+    const yWrap=div("");yWrap.style.cssText="opacity:.8";
+    const info=div("","📋 Readonly — "+WEEK_LABELS[yweek]+" · "+yesterdayDate);
+    info.style.cssText="font-size:10px;font-weight:900;color:#64748b;letter-spacing:.06em;margin-bottom:10px;text-align:center";
+    yWrap.appendChild(info);
+    ysched.forEach(s=>{
+      const node=div("day-node");node.appendChild(div("day-node-dot"));
+      const win=div("zion-day-window");
+      const time=div("day-node-time",s.timeStart||s.time||"");time.style.color="#64748b";
+      win.appendChild(time);
+      win.appendChild(div("day-node-label",s.label));
+      const suplDone=s.supls.length>0&&s.supls.every(x=>yd.logs[yweek+"_"+s.id+"_supl_"+x.name]);
+      const foodDone=s.foods.length>0&&s.foods.every(x=>yd.logs[yweek+"_"+s.id+"_food_"+x.name]);
+      const hasTasks=s.supls.length>0||s.foods.length>0;
+      const done=!hasTasks?false:(s.supls.length===0?foodDone:s.foods.length===0?suplDone:suplDone&&foodDone);
+      const sub=div("day-node-sub",!hasTasks?"INFO":done?"✓ HOTOVO":"✗ NESPLNĚNO");
+      sub.style.color=done?"#22c55e":"#64748b";
+      win.appendChild(sub);node.appendChild(win);yWrap.appendChild(node);
+    });
+    content.appendChild(yWrap);return;
+  }
   const wrap=div("");wrap.id="day-wrap";wrap.style.cssText="position:relative;padding-left:0;padding-top:6px;padding-bottom:40px";
   wrap.appendChild(div("day-track"));wrap.appendChild(div("day-track-ideal"));
   const liveDot=div("day-live-dot");liveDot.id="day-live-dot";wrap.appendChild(liveDot);
@@ -743,10 +881,10 @@ function renderInlineSuplButton(right,s,x,bioNow,nowStr,isMissed){
         S.logs[lk]={time:bioNow,timeStr:nowStr,isManual:false};delete S.skips[sk];save();render();
       });
     }));
-    b.style.color=isMissed?"#ef4444":SUPL_COLORS[x.name]||"#64748b";b.style.borderColor=b.style.color;right.appendChild(b);
+    b.style.color=isMissed?"#ef4444":getColor("supl_"+x.name,SUPL_COLORS[x.name]||"#64748b");b.style.borderColor=b.style.color;right.appendChild(b);
     // skip button for supls in NOW tab
     const skipB=btn("done-btn","Vynechat",()=>guardActive(()=>{S.skips[sk]={time:bioNow,timeStr:nowStr};delete S.logs[lk];save();render()}));
-    skipB.style.cssText="font-size:9px;font-weight:900;padding:4px 9px;border-radius:7px;color:#64748b;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09)";
+    skipB.style.cssText=`font-size:9px;font-weight:900;padding:4px 9px;border-radius:7px;color:${getColor("btn_vynechat","#64748b")};background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09)`;
     right.appendChild(skipB);
   }
 }
@@ -755,29 +893,35 @@ function renderInlineSuplButton(right,s,x,bioNow,nowStr,isMissed){
 function renderInlineFoodButton(right,s,x,bioNow,nowStr,isMissed){
   const swapKey=S.week+"_"+s.id+"_swap_"+x.name,isSwapped=x.swappable&&S.foodSwaps[swapKey],eff=isSwapped?x.swapWith:x;
   const lk=S.week+"_"+s.id+"_food_"+x.name,fsk=foodSkipKey(s,x),lg=S.logs[lk],fsp=S.skips[fsk];
-  const shortName=eff.name.length>24?eff.name.substring(0,22)+"…":eff.name;
+  const shortName=eff.name.length>18?eff.name.substring(0,16)+"…":eff.name;
   const iw=div("");iw.style.cssText="display:flex;flex-direction:column;align-items:flex-end;gap:4px";
-  if(x.swappable){
-    const tog=btn("","🔄 Slunečnice ~ Eidam",()=>guardActive(()=>{S.foodSwaps[swapKey]=!isSwapped;delete S.logs[lk];save();render()}));
-    tog.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:6px;background:#0f172a;border:1px solid #1e293b;color:#64748b";iw.appendChild(tog);
-  }
   if(lg){
     iw.appendChild(btn("done-btn","✅ "+shortName+" ("+lg.timeStr+")",()=>guardActive(()=>{S.modal={key:lk,title:eff.name,time:lg.timeStr};render()})));
   }else if(fsp){
-    // food was skipped
     const sb=btn("done-btn","⏭ "+shortName+" vynecháno",()=>guardActive(()=>{S.modal={type:"foodskip",key:fsk,foodKey:lk,title:eff.name,time:fsp.timeStr};render()}));
     sb.style.color="#fb7185";sb.style.borderColor="#7f1d1d";iw.appendChild(sb);
   }else{
-    const b=btn("supl-btn",isMissed?"↩ Zpětně: "+shortName:"✓ "+shortName,()=>guardActive(()=>{
-      tryLog(s, bioNow, () => {
-        S.logs[lk]={time:bioNow,timeStr:nowStr,isManual:false};save();render();
-      });
+    const foodColor=getColor("btn_food","#fb7185");
+    // action row: swap toggle LEFT + main button RIGHT
+    const actionRow=div("");actionRow.style.cssText="display:flex;align-items:center;gap:4px";
+    if(x.swappable){
+      const activeStyle=`padding:3px 7px;border-radius:6px;font-size:12px;background:rgba(${S.theme.rgb},.25);border:1px solid rgba(${S.theme.rgb},.6)`;
+      const inactiveStyle="padding:3px 7px;border-radius:6px;font-size:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);opacity:.45";
+      const b1=btn("","🌻",()=>guardActive(()=>{S.foodSwaps[swapKey]=false;delete S.logs[lk];save();render()}));
+      const b2=btn("","🧀",()=>guardActive(()=>{S.foodSwaps[swapKey]=true;delete S.logs[lk];save();render()}));
+      b1.style.cssText=!isSwapped?activeStyle:inactiveStyle;
+      b2.style.cssText=isSwapped?activeStyle:inactiveStyle;
+      actionRow.appendChild(b1);actionRow.appendChild(b2);
+    }
+    const mainBtn=btn("supl-btn",isMissed?"↩ Zpětně: "+shortName:"✓ "+shortName,()=>guardActive(()=>{
+      tryLog(s,bioNow,()=>{S.logs[lk]={time:bioNow,timeStr:nowStr,isManual:false};save();render()});
     }));
-    b.style.color=isMissed?"#ef4444":"#fb7185";b.style.borderColor=isMissed?"#7f1d1d":"rgba(251,113,133,.5)";
-    // skip button
+    mainBtn.style.color=isMissed?"#ef4444":foodColor;mainBtn.style.borderColor=isMissed?"#7f1d1d":`rgba(${S.theme.rgb},.3)`;
+    actionRow.appendChild(mainBtn);
+    iw.appendChild(actionRow);
     const skipB=btn("done-btn","Vynechat",()=>guardActive(()=>{S.skips[fsk]={time:bioNow,timeStr:nowStr};delete S.logs[lk];save();render()}));
-    skipB.style.cssText="font-size:9px;font-weight:900;padding:4px 9px;border-radius:7px;color:#64748b;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09)";
-    iw.appendChild(b);iw.appendChild(skipB);
+    skipB.style.cssText=`font-size:9px;font-weight:900;padding:4px 9px;border-radius:7px;color:${getColor("btn_vynechat","#64748b")};background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09)`;
+    iw.appendChild(skipB);
   }
   right.appendChild(iw);
 }
@@ -815,33 +959,39 @@ function renderFood(content,slots,bioNow,nowStr,isActiveWeek){
       row.style.background=eaten?"rgba(5,46,22,.42)":foodSkipped?"rgba(127,29,29,.15)":s.isMissed?"rgba(239,68,68,.08)":"rgba(9,14,28,.76)";
       const lft=div("");
       lft.innerHTML=`<div style="font-size:11px;font-weight:700;color:${eaten?"#bbf7d0":foodSkipped?"#fca5a5":"#f1f5f9"}">${eff.name}</div><div style="font-size:9px;color:${eaten?"#4ade80":foodSkipped?"#fb7185":s.isMissed?"#ef4444":"#475569"};margin-top:2px">${isSwapped?"🧀 Náhrada · ":""}${eaten?"✓ SNĚZENO · ":foodSkipped?"⏭ VYNECHÁNO · ":s.isMissed?"⚠ MISSED · ":""}${s.label}</div>`;
-      const rgt=div("");rgt.style.cssText="display:flex;flex-direction:column;align-items:flex-end";
+      const rgt=div("");rgt.style.cssText="display:flex;flex-direction:column;align-items:flex-end;gap:3px";
       rgt.innerHTML=`<div style="font-size:11px;font-weight:900;color:${eaten?"#86efac":foodSkipped?"#64748b":"#f43f5e"}">${eff.kcal} kcal</div>`;
-      if(f.swappable){
-        const tog=btn("","🔄 Slunečnice ~ Eidam",()=>guardActive(()=>{S.foodSwaps[swapKey]=!isSwapped;delete S.logs[lk];save();render()}));
-        tog.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:6px;background:#0f172a;border:1px solid #1e293b;color:#64748b;margin-top:4px;display:block";
-        rgt.appendChild(tog);
-      }
       if(foodSkipped){
-        // show un-skip button
         const sb=btn("","⏭ VYNECHÁNO",()=>guardActive(()=>{S.modal={type:"foodskip",key:fsk,foodKey:lk,title:eff.name,time:S.skips[fsk].timeStr};render()}));
-        sb.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:5px;margin-top:4px;background:rgba(127,29,29,.18);color:#fb7185;border:1px solid #7f1d1d";
+        sb.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:5px;background:rgba(127,29,29,.18);color:#fb7185;border:1px solid #7f1d1d";
         if(!isActiveWeek)sb.classList.add("muted");rgt.appendChild(sb);
+      }else if(eaten){
+        // klik na snězené jídlo = otevřít editor času
+        const tb=btn("","✓ SNĚZENO",()=>guardActive(()=>{S.modal={key:lk,title:eff.name,time:S.logs[lk].timeStr};render()}));
+        tb.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:5px;background:#052e16;color:#4ade80;border:1px solid #14532d";
+        rgt.appendChild(tb);
       }else{
-        const tb=btn("",eaten?"✓ SNĚZENO":s.isMissed?"↩ ZPĚTNĚ":"NEZAPSANÉ",()=>guardActive(()=>{
-          if(eaten) S.modal={key:lk,title:eff.name,time:S.logs[lk].timeStr};
-          else {
-            tryLog(s, bioNow, () => {
-              S.logs[lk]={time:bioNow,timeStr:nowStr,isManual:false};save();render();
-            });
-          }
+        // nezapsané — řádek se swap togglem + tlačítko
+        const actionRow=div("");actionRow.style.cssText="display:flex;align-items:center;gap:3px;margin-top:2px";
+        if(f.swappable){
+          const activeStyle=`padding:3px 7px;border-radius:6px;font-size:12px;background:rgba(${S.theme.rgb},.25);border:1px solid rgba(${S.theme.rgb},.6)`;
+          const inactiveStyle="padding:3px 7px;border-radius:6px;font-size:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);opacity:.45";
+          const b1=btn("","🌻",()=>guardActive(()=>{S.foodSwaps[swapKey]=false;delete S.logs[lk];save();render()}));
+          const b2=btn("","🧀",()=>guardActive(()=>{S.foodSwaps[swapKey]=true;delete S.logs[lk];save();render()}));
+          b1.style.cssText=!isSwapped?activeStyle:inactiveStyle;
+          b2.style.cssText=isSwapped?activeStyle:inactiveStyle;
+          actionRow.appendChild(b1);actionRow.appendChild(b2);
+        }
+        const tb=btn("",s.isMissed?"↩ ZPĚTNĚ":"NEZAPSANÉ",()=>guardActive(()=>{
+          tryLog(s,bioNow,()=>{S.logs[lk]={time:bioNow,timeStr:nowStr,isManual:false};save();render()});
         }));
-        tb.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:5px;margin-top:4px;"+(eaten?"background:#052e16;color:#4ade80;border:1px solid #14532d":"background:#0f172a;color:#64748b;border:1px solid #1e293b");
-        if(!isActiveWeek)tb.classList.add("muted");rgt.appendChild(tb);
-        // add vynechat button in food tab for uneaten items
-        if(!eaten&&isActiveWeek){
+        tb.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:5px;background:#0f172a;color:#64748b;border:1px solid #1e293b";
+        if(!isActiveWeek)tb.classList.add("muted");
+        actionRow.appendChild(tb);
+        rgt.appendChild(actionRow);
+        if(isActiveWeek){
           const fskBtn=btn("","Vynechat",()=>guardActive(()=>{S.skips[fsk]={time:bioNow,timeStr:nowStr};delete S.logs[lk];save();render()}));
-          fskBtn.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:5px;margin-top:3px;background:#0f172a;color:#64748b;border:1px solid #1e293b";rgt.appendChild(fskBtn);
+          fskBtn.style.cssText="font-size:9px;font-weight:900;padding:3px 8px;border-radius:5px;background:#0f172a;color:#64748b;border:1px solid #1e293b";rgt.appendChild(fskBtn);
         }
       }
       row.appendChild(lft);row.appendChild(rgt);list.appendChild(row);
@@ -888,7 +1038,9 @@ function renderCodex(content){
   const b3=btn("","📋 KOPÍROVAT KÓD APP",()=>{S.modal={type:"appcode"};render()});b3.style.cssText=b1.style.cssText;
   const b4=btn("","☁️ CLOUD SYNC (Google Sheets)",()=>{S.modal={type:"cloudsync"};render()});
   b4.style.cssText="width:100%;padding:12px;border-radius:10px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.35);color:#60a5fa;font-size:11px;font-weight:900;margin-bottom:8px";
-  content.appendChild(b1);content.appendChild(b2);content.appendChild(b3);content.appendChild(b4);
+  const b5=btn("",(S.myColorsMode?"🎨 MY COLORS: ZAP":"🎨 MY COLORS: VYP")+" — Upravit barvy",()=>{S.modal={type:"mycolors"};render()});
+  b5.style.cssText=`width:100%;padding:12px;border-radius:10px;background:rgba(${S.theme.rgb},.08);border:1px solid rgba(${S.theme.rgb},.3);color:${S.theme.hex};font-size:11px;font-weight:900;margin-bottom:8px`;
+  content.appendChild(b1);content.appendChild(b2);content.appendChild(b3);content.appendChild(b4);content.appendChild(b5);
 }
 
 function renderModal(wrap,slots){
@@ -900,6 +1052,107 @@ function renderModal(wrap,slots){
     box.appendChild(ttl);box.appendChild(msg);
     if(m.type==="alert"){const ok=btn("","Zavřít",()=>{S.modal=null;render()});ok.style.cssText="width:100%;padding:12px;border-radius:10px;font-size:11px;font-weight:900;color:#fff;background:#1e293b";box.appendChild(ok)}
     else{const row=div("");row.style.cssText="display:flex;gap:8px";const cancel=btn("","Zpět",()=>{S.modal=null;render()});const ok=btn("","✓ Potvrdit",()=>m.onOk());cancel.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";ok.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:900;color:#f87171;background:rgba(239,68,68,.15);border:1px solid #7f1d1d";row.appendChild(cancel);row.appendChild(ok);box.appendChild(row)}
+  // ── COLOR PICKER modal ──
+  }else if(m.type==="colorpicker"||m.type==="colorpicker_mycolors"){
+    const isMyColors=m.type==="colorpicker_mycolors";
+    const ttl=div("",isMyColors?"🎨 Vyber barvu: "+m.label:"🎨 Vlastní barva tématu");
+    ttl.style.cssText="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:14px;text-align:center";
+    box.appendChild(ttl);
+    const palette=["#000000","#ef4444","#f97316","#f59e0b","#eab308","#84cc16","#22c55e","#10b981","#14b8a6","#06b6d4","#3b82f6","#8b5cf6","#a855f7","#ec4899","#94a3b8","#ffffff"];
+    const grid=div("");grid.style.cssText="display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:16px";
+    const applyColor=(hex,closeModal=true)=>{
+      if(isMyColors){
+        S.myColors[m.key]=hex;save();
+        if(closeModal){S.modal={type:"mycolors"};render();}
+      }else{
+        const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+        S.theme={id:"custom",hex,rgb:`${r},${g},${b}`,bg:"#000",bgRgb:"0,0,0",panel:`rgba(${r},${g},${b},.09)`};
+        save();setCSS();
+        if(closeModal){S.modal=null;render();}
+      }
+    };
+    const currentHex=isMyColors?(S.myColors[m.key]||"#3b82f6"):(S.theme.id==="custom"?S.theme.hex:"#3b82f6");
+    palette.forEach(hex=>{
+      const sw=btn("","",()=>applyColor(hex));
+      const isSelected=currentHex===hex;
+      sw.style.cssText=`width:100%;aspect-ratio:1;border-radius:8px;background:${hex};border:${isSelected?"3px solid #fff":"2px solid rgba(255,255,255,.15)"};box-shadow:${isSelected?"0 0 14px "+hex+",0 0 0 2px rgba(255,255,255,.3)":"none"};transition:transform .1s`;
+      grid.appendChild(sw);
+    });
+    box.appendChild(grid);
+    // HSL sliders
+    const hslLabel=div("","— nebo posuň posuvníky —");hslLabel.style.cssText="font-size:9px;font-weight:700;color:#475569;text-align:center;margin-bottom:10px;letter-spacing:.08em";
+    box.appendChild(hslLabel);
+    // parse current hex to HSL
+    function hexToHsl(hex){const r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255;const max=Math.max(r,g,b),min=Math.min(r,g,b);let h,s,l=(max+min)/2;if(max===min){h=s=0}else{const d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);switch(max){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break;}}return[Math.round(h*360),Math.round(s*100),Math.round(l*100)];}
+    function hslToHex(h,s,l){h/=360;s/=100;l/=100;let r,g,b;if(s===0){r=g=b=l}else{const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};const q=l<0.5?l*(1+s):l+s-l*s,p=2*l-q;r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3);}return"#"+[r,g,b].map(x=>Math.round(x*255).toString(16).padStart(2,"0")).join("");}
+    let [ch,cs,cl]=hexToHsl(currentHex);
+    const preview=div("");preview.style.cssText=`width:100%;height:32px;border-radius:8px;background:${currentHex};margin-bottom:12px;border:1px solid rgba(255,255,255,.2);transition:background .1s`;
+    box.appendChild(preview);
+    const updatePreview=()=>{const hex=hslToHex(ch,cs,cl);preview.style.background=hex;};
+    const mkSlider=(label,val,min,max,onChange)=>{
+      const row=div("");row.style.cssText="display:flex;align-items:center;gap:10px;margin-bottom:16px";
+      const lbl=div("",label);lbl.style.cssText="font-size:10px;font-weight:700;color:#64748b;width:14px;text-align:center";
+      const sl=el("input","zion-slider");sl.type="range";sl.min=min;sl.max=max;sl.value=val;
+      sl.style.setProperty("--pct",`${Math.round(((val-min)/(max-min))*100)}%`);
+      sl.addEventListener("input",e=>{onChange(parseInt(e.target.value));sl.style.setProperty("--pct",`${Math.round(((parseInt(e.target.value)-min)/(max-min))*100)}%`);updatePreview();});
+      sl.addEventListener("change",()=>{const hex=hslToHex(ch,cs,cl);applyColor(hex,false);});
+      row.appendChild(lbl);row.appendChild(sl);return row;
+    };
+    box.appendChild(mkSlider("H",ch,0,360,v=>{ch=v;}));
+    box.appendChild(mkSlider("S",cs,0,100,v=>{cs=v;}));
+    box.appendChild(mkSlider("L",cl,10,90,v=>{cl=v;}));
+    const back=btn("","Zpět",()=>{S.modal=isMyColors?{type:"mycolors"}:null;render()});
+    back.style.cssText="width:100%;padding:11px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b;margin-top:6px";
+    box.appendChild(back);
+  // ── MY COLORS modal ──
+  }else if(m.type==="mycolors"){
+    const modeLabel=S.myColorsMode?"🎨 MY COLORS — aktivní":"🎨 DEFAULT — výchozí barvy";
+    const ttl=div("",modeLabel);
+    ttl.style.cssText=`font-size:14px;font-weight:700;margin-bottom:4px;text-align:center;color:${S.myColorsMode?S.theme.hex:"#94a3b8"}`;
+    box.appendChild(ttl);
+    // Lock toggle
+    const lockRow=div("");lockRow.style.cssText="display:flex;gap:8px;margin-bottom:16px";
+    const bDef=btn("","DEFAULT",()=>{S.myColorsMode=false;save();S.modal={type:"mycolors"};render()});
+    const bMy=btn("","MY COLORS",()=>{S.myColorsMode=true;save();S.modal={type:"mycolors"};render()});
+    bDef.style.cssText=`flex:1;padding:9px;border-radius:9px;font-size:11px;font-weight:900;${!S.myColorsMode?`background:rgba(${S.theme.rgb},.2);border:1px solid rgba(${S.theme.rgb},.5);color:#fff`:"background:#000;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.5)"}`;
+    bMy.style.cssText=`flex:1;padding:9px;border-radius:9px;font-size:11px;font-weight:900;${S.myColorsMode?`background:rgba(${S.theme.rgb},.2);border:1px solid rgba(${S.theme.rgb},.5);color:#fff`:"background:#000;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.5)"}`;
+    lockRow.appendChild(bDef);lockRow.appendChild(bMy);
+    box.appendChild(lockRow);
+    const items=[
+      {key:"supl_Taurin",label:"Taurin",def:"#f97316"},
+      {key:"supl_Ca+Mg+Zn",label:"Ca+Mg+Zn",def:"#3b82f6"},
+      {key:"supl_D3+K2",label:"D3+K2",def:"#eab308"},
+      {key:"supl_Mg+B6",label:"Mg+B6",def:"#22c55e"},
+      {key:"btn_food",label:"Jídlo (✓ tlačítko)",def:"#fb7185"},
+      {key:"btn_vynechat",label:"Vynechat",def:"#64748b"},
+    ];
+    // V DEFAULT režimu ukažeme jen readonly přehled, nelze editovat
+    if(!S.myColorsMode){
+      const info=div("","V DEFAULT režimu se používají výchozí barvy aplikace. Přepni na MY COLORS pro vlastní barvy.");
+      info.style.cssText="font-size:11px;color:#64748b;text-align:center;margin-bottom:14px;line-height:1.5;padding:10px;background:#0f172a;border-radius:8px;border:1px solid #1e293b";
+      box.appendChild(info);
+      items.forEach(item=>{
+        const row=div("");row.style.cssText="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:8px 10px;border-radius:9px;background:#070b15;border:1px solid #0f172a;opacity:.6";
+        const lbl=div("",item.label);lbl.style.cssText="flex:1;font-size:12px;font-weight:700;color:#475569";
+        const sw=div("");sw.style.cssText=`width:28px;height:28px;border-radius:6px;background:${item.def};border:2px solid rgba(255,255,255,.1);flex-shrink:0`;
+        row.appendChild(lbl);row.appendChild(sw);box.appendChild(row);
+      });
+    }else{
+      items.forEach(item=>{
+        const row=div("");row.style.cssText="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:8px 10px;border-radius:9px;background:#0f172a;border:1px solid #1e293b";
+        const lbl=div("",item.label);lbl.style.cssText="flex:1;font-size:12px;font-weight:700;color:#f1f5f9";
+        const currentColor=S.myColors[item.key]||item.def;
+        const sw=btn("","",()=>{S.modal={type:"colorpicker_mycolors",key:item.key,label:item.label};render()});
+        sw.style.cssText=`width:28px;height:28px;border-radius:6px;background:${currentColor};border:2px solid rgba(255,255,255,.2);flex-shrink:0`;
+        const resetBtn=btn("","↺",()=>{delete S.myColors[item.key];save();S.modal={type:"mycolors"};render()});
+        resetBtn.style.cssText="font-size:14px;color:#374151;padding:4px 6px";
+        row.appendChild(lbl);row.appendChild(sw);row.appendChild(resetBtn);
+        box.appendChild(row);
+      });
+    }
+    const close=btn("","Zavřít",()=>{S.modal=null;render()});
+    close.style.cssText="width:100%;padding:11px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b;margin-top:6px";
+    box.appendChild(close);
   // ── CLOUD SYNC modals ──
   }else if(m.type==="cloudsync"){
     const ttl=div("","☁️ CLOUD SYNC");ttl.style.cssText="font-size:15px;font-weight:700;color:#60a5fa;margin-bottom:6px;text-align:center";
@@ -923,36 +1176,47 @@ function renderModal(wrap,slots){
 
   }else if(m.type==="cloud_sending"){
     const ttl=div("","📤 Odesílám do cloudu...");ttl.style.cssText="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:8px;text-align:center";
-    const status=div("","Připojuji se...");status.style.cssText="font-size:12px;color:#64748b;text-align:center;margin-bottom:20px;min-height:36px;line-height:1.6";
+    const status=div("",m.sent?"✅ Odesláno do cloudu!":m.error?"⚠️ "+m.error:"Připojuji se...");
+    status.style.cssText="font-size:12px;text-align:center;margin-bottom:20px;min-height:36px;line-height:1.6;color:"+(m.sent?"#34d399":m.error?"#f87171":"#64748b");
     box.appendChild(ttl);box.appendChild(status);
     const close=btn("","Zavřít",()=>{S.modal=null;render()});
     close.style.cssText="width:100%;padding:11px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";
     box.appendChild(close);
-    setTimeout(()=>{
-      fetch(CLOUD_WEBHOOK,{method:"POST",body:JSON.stringify({typ:m.typ,data:m.payload}),headers:{"Content-Type":"application/json"}})
-        .then(r=>r.json())
-        .then(r=>{
-          if(r.ok){status.textContent="✅ Odesláno! sync_id: "+r.sync_id;status.style.color="#34d399"}
-          else{status.textContent="⚠️ Chyba: "+r.error;status.style.color="#f87171"}
-        })
-        .catch(e=>{status.textContent="⚠️ Chyba připojení: "+e.message;status.style.color="#f87171"});
-    },100);
+    if(!m.sent&&!m.error&&!m.fetching){
+      m.fetching=true;
+      fetch(CLOUD_WEBHOOK,{method:"POST",body:JSON.stringify({typ:m.typ,data:m.payload}),mode:"no-cors"})
+        .then(()=>{m.sent=true;m.fetching=false;status.textContent="✅ Odesláno do cloudu!";status.style.color="#34d399"})
+        .catch(e=>{m.error=e.message;m.fetching=false;status.textContent="⚠️ "+e.message;status.style.color="#f87171"});
+    }
 
   }else if(m.type==="cloud_loading"){
     const ttl=div("","📥 Zálohy v cloudu");ttl.style.cssText="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:8px;text-align:center";
     const status=div("","Načítám seznam...");status.style.cssText="font-size:12px;color:#64748b;text-align:center;margin-bottom:10px";
     const list=div("");list.style.cssText="max-height:220px;overflow-y:auto;margin-bottom:12px";
-    box.appendChild(ttl);box.appendChild(status);box.appendChild(list);
+
+    // typ selector - pouze data ke stažení, kód nemá smysl importovat
+    const selRow=div("");selRow.style.cssText="display:flex;gap:8px;margin-bottom:12px";
+    const btnD=btn("","📊 Data",()=>{loadCloud("data")});
+    btnD.style.cssText="flex:1;padding:9px;border-radius:9px;font-size:11px;font-weight:900;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.35);color:#34d399";
+    selRow.appendChild(btnD);
+
+    box.appendChild(ttl);box.appendChild(selRow);box.appendChild(status);box.appendChild(list);
     const close=btn("","Zavřít",()=>{S.modal=null;render()});
     close.style.cssText="width:100%;padding:11px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";
     box.appendChild(close);
-    setTimeout(()=>{
-      fetch(CLOUD_WEBHOOK)
+
+    function loadCloud(typ){
+      if(m.loading)return;
+      m.loading=true;
+      list.innerHTML="";status.textContent="Načítám...";
+      fetch(CLOUD_WEBHOOK+"?typ="+typ)
         .then(r=>r.json())
         .then(r=>{
-          if(!r.ok){status.textContent="⚠️ Chyba: "+r.error;status.style.color="#f87171";return}
-          if(!r.zalohy.length){status.textContent="Žádné zálohy v cloudu.";return}
+          m.loading=false;
+          if(!r.ok){status.textContent="⚠️ Chyba: "+r.error;return}
+          if(!r.zalohy.length){status.textContent="Žádné zálohy tohoto typu.";return}
           status.textContent="Vyber zálohu k načtení:";
+          list.innerHTML="";
           r.zalohy.forEach(z=>{
             const row=btn("",`#${z.sync_id} · ${z.typ==="data"?"📊 Data":"📋 Kód"} · ${z.datum}`,()=>{
               S.modal={type:"cloud_download",sync_id:z.sync_id,typ:z.typ,datum:z.datum};render();
@@ -961,8 +1225,10 @@ function renderModal(wrap,slots){
             list.appendChild(row);
           });
         })
-        .catch(e=>{status.textContent="⚠️ Chyba připojení: "+e.message;status.style.color="#f87171"});
-    },100);
+        .catch(e=>{m.loading=false;status.textContent="⚠️ Chyba připojení: "+e.message;});
+    }
+    // auto-load data only
+    if(!m.loading)setTimeout(()=>loadCloud("data"),100);
 
   }else if(m.type==="cloud_download"){
     const ttl=div("",`📥 Načíst zálohu #${m.sync_id}`);ttl.style.cssText="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px;text-align:center";
@@ -974,7 +1240,7 @@ function renderModal(wrap,slots){
     if(m.typ==="data"){
       const ok=btn("","✓ Načíst a importovat",()=>{
         status.textContent="Stahuji...";status.style.color="#64748b";
-        fetch(CLOUD_WEBHOOK+"?sync_id="+m.sync_id)
+        fetch(CLOUD_WEBHOOK+"?sync_id="+m.sync_id+"&typ="+m.typ)
           .then(r=>r.json())
           .then(r=>{
             if(!r.ok){status.textContent="⚠️ "+r.error;status.style.color="#f87171";return}
@@ -1038,7 +1304,7 @@ function renderModal(wrap,slots){
   ov.appendChild(box);wrap.appendChild(ov);
 }
 
-setInterval(()=>{if(!S.manualTime){S.now=new Date();render()}},5000);
+const _timer=setInterval(()=>{if(!S.manualTime&&!S.modal){S.now=new Date();render()}},5000);
 window.addEventListener("pagehide",save);
 window.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")save()});
 S._scrollToCurrent=true;
