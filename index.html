@@ -293,10 +293,13 @@ const S={
   if(STORE.getItem("nos_last_cycle")!==cycleKey){
     const backupData=JSON.stringify({logs:S.logs,skips:S.skips,foodSwaps:S.foodSwaps});
     const hasData=Object.keys(S.logs).length>0||Object.keys(S.skips).length>0;
-    if(hasData){
+    const todayStr=cd.toISOString().slice(0,10);
+    // Backup jen pokud ještě nebyl uložen pro tento datum a tuto směnu
+    const alreadyBacked=STORE.getItem("nos_yesterday_date")===todayStr && STORE.getItem("nos_yesterday_week")===S.activeWeek;
+    if(hasData && !alreadyBacked){
       STORE.setItem("nos_yesterday_data",backupData);
       STORE.setItem("nos_yesterday_week",S.activeWeek);
-      STORE.setItem("nos_yesterday_date",cd.toISOString().slice(0,10));
+      STORE.setItem("nos_yesterday_date",todayStr);
       try{fetch(CLOUD_WEBHOOK,{method:"POST",body:JSON.stringify({typ:"data",data:backupData}),mode:"no-cors"}).catch(()=>{})}catch(e){}
     }
 
