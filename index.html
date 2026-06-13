@@ -264,6 +264,62 @@ async function hydrateFallbackState(){
   FALLBACK_READY=true;render();
 }
 
+// ════════════════════════════════════════════════════════
+// DETERMINISTICKÝ VÝPOČET SMĚNY
+// Směna = f(kotva, datum). Funguje stejně na všech zařízeních,
+// nezávisle na tom, kdy app naposledy běžela.
+//
+// Kotva: nos_rot_anchor_monday = timestamp pondělí 00:00
+//        nos_rot_anchor_index  = 0=Noční(A), 1=Odpolední(B), 2=Ranní(C)
+//        ...směna která začíná v ten pondělní týden.
+//
+// Pravidla v rámci týdne (Po=1..Pá=5, So=6, Ne=0):
+//   A (Noční):   Po–Čt = A; Pá = A do 20:00, pak V; So,Ne = V
+//   B (Odpol.):  Po–Pá = B; So,Ne = V
+//   C (Ranní):   Po–Pá = C; So,Ne = V
+// Změna směny tedy proběhne v pondělí 00:00 (A/B/C nastup),
+// resp. Noční→Volno v pátek 20:00.
+// ════════════════════════════════════════════════════════
+function rotMondayOf(date){
+  const d=new Date(date);d.setHours(0,0,0,0);
+  const dow=d.getDay();                 // 0=Ne..6=So
+  const daysToMon=(dow===0)?6:(dow-1);  // Ne → pondělí o 6 dní zpět
+  d.setDate(d.getDate()-daysToMon);
+  return d;
+}
+function computeShift(date){
+  const aTs=parseInt(STORE.getItem("nos_rot_anchor_monday"));
+  const aIdx=parseInt(STORE.getItem("nos_rot_anchor_index"));
+  if(isNaN(aTs)||isNaN(aIdx))return null; // kotva nenastavena
+  const monday=rotMondayOf(date);
+  const anchorMon=rotMondayOf(new Date(aTs));
+  const weeksDiff=Math.round((monday.getTime()-anchorMon.getTime())/(7*24*3600*1000));
+  const workIdx=((aIdx+weeksDiff)%3+3)%3;
+  const workShift=["A","B","C"][workIdx];
+  const dow=date.getDay();
+  const mins=date.getHours()*60+date.getMinutes();
+  if(workShift==="A"){
+    if(dow>=1&&dow<=4)return "A";
+    if(dow===5)return mins<t2m("20:00")?"A":"V";
+    return "V"; // So, Ne
+  }
+  // B nebo C: Po–Pá práce, víkend Volno
+  if(dow>=1&&dow<=5)return workShift;
+  return "V";
+}
+// Najde nejbližší budoucí změnu směny (pro info řádek pod tlačítky)
+function nextShiftChange(fromDate){
+  const cur=computeShift(fromDate);
+  if(cur===null)return null;
+  const start=new Date(fromDate);
+  for(let step=1;step<=8*24*60;step+=15){ // hledej po 15 min až 8 dní dopředu
+    const t=new Date(start.getTime()+step*60000);
+    const s=computeShift(t);
+    if(s!==cur)return {from:cur,to:s,when:t};
+  }
+  return null;
+}
+
 const S={
   week:STORE.getItem("nos_week")||"A",
   activeWeek:STORE.getItem("nos_active_week")||STORE.getItem("nos_week")||"A",
@@ -276,88 +332,53 @@ const S={
 };
 
 (function(){
-  const sched=WEEKS[S.activeWeek].schedule;if(!sched.length)return;
-  const resetTimeStr=WEEKS[S.activeWeek].resetTime||sched[0].timeStart||sched[0].time||"00:00";
-  const cycleStartMin=t2m(resetTimeStr),now=new Date(),nowMin=now.getHours()*60+now.getMinutes(),cd=new Date(now);
+  const now=new Date();
+  const realShift=computeShift(now); // deterministická pravda (null pokud kotva nenastavena)
+
+  // ── Výpočet data cyklu pro zálohu (dle aktuálně viděné/aktivní směny) ──
+  const effShift=realShift||S.activeWeek;
+  const sched=WEEKS[effShift].schedule;if(!sched.length){if(realShift&&realShift!==S.activeWeek){S.activeWeek=realShift;S.week=realShift;}return;}
+  const resetTimeStr=WEEKS[effShift].resetTime||sched[0].timeStart||"00:00";
+  const cycleStartMin=t2m(resetTimeStr),nowMin=now.getHours()*60+now.getMinutes(),cd=new Date(now);
   if(nowMin<cycleStartMin)cd.setDate(cd.getDate()-1);
 
-  // Speciální případ: Noční (A) v pátek → přepni na Volno ve 20:00
-  const dow=now.getDay(); // 0=Ne,1=Po,...,5=Pá,6=So
-  const isFridayNoční=(dow===5 && S.activeWeek==="A" && nowMin>=t2m("20:00"));
-  
-  // Pro Volno přepnutí použijeme speciální cycleKey
-  const cycleKey=isFridayNoční
-    ? cd.toISOString().slice(0,10)+"_VOLNO_PATEK"
-    : cd.toISOString().slice(0,10)+"_"+sched[0].id;
+  // Zjisti, jestli zrovna probíhá přechod Noční→Volno (data patří Noční)
+  const dow=now.getDay();
+  const leavingNoctní=(S.activeWeek==="A" && realShift==="V"); // byli jsme Noční, teď je Volno
+
+  // cycleKey podle data cyklu
+  const cycleKey=cd.toISOString().slice(0,10)+"_"+effShift;
 
   if(STORE.getItem("nos_last_cycle")!==cycleKey){
     const backupData=JSON.stringify({logs:S.logs,skips:S.skips,foodSwaps:S.foodSwaps});
     const hasData=Object.keys(S.logs).length>0||Object.keys(S.skips).length>0;
     const todayStr=cd.toISOString().slice(0,10);
-    // Backup jen pokud ještě nebyl uložen pro tento datum (bez ohledu na směnu)
     const alreadyBacked=STORE.getItem("nos_yesterday_date")===todayStr;
     if(hasData && !alreadyBacked){
       STORE.setItem("nos_yesterday_data",backupData);
-      // Ulož směnu PŘED přepnutím (ne po) — pro správné zobrazení včerejška
-      STORE.setItem("nos_yesterday_week",S.activeWeek);
+      // Směna, ke které data patří: pokud opouštíme Noční, ulož jako "A"
+      STORE.setItem("nos_yesterday_week",leavingNoctní?"A":S.activeWeek);
       STORE.setItem("nos_yesterday_date",todayStr);
       try{fetch(CLOUD_WEBHOOK,{method:"POST",body:JSON.stringify({typ:"data",data:backupData}),mode:"no-cors"}).catch(()=>{})}catch(e){}
     }
-
-    if(isFridayNoční){
-      // Pátek 20:00 → přepni Noční na Volno, označ že cyklus začíná od 20:00
-      STORE.setItem("nos_pre_volno_shift","A");
-      STORE.setItem("nos_volno_patek","1"); // flag: tento cyklus Volna začal v pátek ve 20:00
-      S.activeWeek="V"; S.week="V";
-      STORE.setItem("nos_active_week","V"); STORE.setItem("nos_week","V");
-    } else {
-      STORE.removeItem("nos_volno_patek"); // normální cyklus Volna — flag smaž
-      // Standardní 00:00 reset
-      const newCycleDate=new Date(cd);newCycleDate.setDate(newCycleDate.getDate()+1);
-      const dow2=newCycleDate.getDay();
-      const cur=S.activeWeek;
-
-      // Pátek 00:00 → Volno (pro B a C)
-      if(dow2===5 && ["B","C"].includes(cur)){
-        STORE.setItem("nos_pre_volno_shift",cur);
-        S.activeWeek="V"; S.week="V";
-        STORE.setItem("nos_active_week","V"); STORE.setItem("nos_week","V");
-      }
-      // Pondělí 00:00 → z Volna (po B)
-      else if(dow2===1 && cur==="V"){
-        const pre=STORE.getItem("nos_pre_volno_shift")||"B";
-        if(pre!=="C"){
-          const seq=["A","B","C"],idx=seq.indexOf(pre);
-          const next=seq[(idx+1)%3];
-          S.activeWeek=next; S.week=next;
-          STORE.setItem("nos_active_week",next); STORE.setItem("nos_week",next);
-        }
-      }
-      // Neděle 00:00 → Noční (po Ranní C)
-      else if(dow2===0 && cur==="V"){
-        const pre=STORE.getItem("nos_pre_volno_shift")||"";
-        if(pre==="C"){
-          S.activeWeek="A"; S.week="A";
-          STORE.setItem("nos_active_week","A"); STORE.setItem("nos_week","A");
-        }
-      }
-      // Ostatní dny → kotva rotace A→B→C
-      else if(["A","B","C"].includes(cur)){
-        const ts=STORE.getItem("nos_anchor_ts"),sh=STORE.getItem("nos_anchor_shift");
-        if(ts&&sh){
-          const m2=new Date(active);m2.setHours(0,0,0,0);const d2=m2.getDay()||7;m2.setDate(m2.getDate()-d2+1);
-          const diffW=Math.round((m2.getTime()-parseInt(ts))/(1000*60*60*24*7));
-          const seq=["A","B","C"],idx=seq.indexOf(sh);
-          if(idx>-1){let nI=(idx+diffW)%3;if(nI<0)nI+=3;const cs=seq[nI];
-            if(S.activeWeek!==cs){const old=S.activeWeek;S.activeWeek=cs;STORE.setItem("nos_active_week",cs);if(S.week===old){S.week=cs;STORE.setItem("nos_week",cs);}}}
-        }
-      }
-    }
-
+    // Vyčisti den
     S.logs={};S.skips={};S.foodSwaps={};
     STORE.setItem("nos_logs","{}");STORE.setItem("nos_skips","{}");STORE.setItem("nos_fswaps","{}");
   }
   STORE.setItem("nos_last_cycle",cycleKey);
+
+  // Flag pro páteční Volno (ořez rozvrhu od 20:00) — drž pokud jsme v pátečním Volnu po Noční
+  const isFridayVolno=(realShift==="V" && dow===5);
+  if(isFridayVolno)STORE.setItem("nos_volno_patek","1");
+  else STORE.removeItem("nos_volno_patek");
+
+  // ── Nastav aktivní směnu podle deterministického výpočtu ──
+  if(realShift && realShift!==S.activeWeek){
+    const old=S.activeWeek;
+    S.activeWeek=realShift;
+    STORE.setItem("nos_active_week",realShift);
+    if(S.week===old){S.week=realShift;STORE.setItem("nos_week",realShift);}
+  }
 })();
 
 function save(){
@@ -651,31 +672,23 @@ function render(){
   });
   wrap.appendChild(wRow);
 
-  // ── INFO O PŘÍŠTÍM PŘEPNUTÍ ──
+  // ── INFO O PŘÍŠTÍM PŘEPNUTÍ (deterministicky vypočítané) ──
   {
     const now2=S.manualTime||S.now;
-    const dow=now2.getDay(); // 0=Ne,1=Po,2=Út,3=St,4=Čt,5=Pá,6=So
-    const cur=S.activeWeek;
-    let nextMsg=null;
-    if(["A","B","C"].includes(cur)){
-      // Kolik dní do pátku?
-      const daysToFri=((5-dow+7)%7)||7;
-      nextMsg=`⏭ Přepnutí na Volno za ${daysToFri===1?"1 den":daysToFri+" dní"} (pátek 00:00)`;
-    }else if(cur==="V"){
-      const pre=STORE.getItem("nos_pre_volno_shift")||"?";
-      if(pre==="C"){
-        const daysToSun=((0-dow+7)%7)||7;
-        nextMsg=`⏭ Přepnutí na Noční za ${daysToSun===1?"1 den":daysToSun+" dní"} (neděle 00:00)`;
-      }else{
-        const daysToMon=((1-dow+7)%7)||7;
-        const seq=["A","B","C"],idx=seq.indexOf(pre);
-        const next=seq[(idx+1)%3];
-        nextMsg=`⏭ Přepnutí na ${WEEK_LABELS[next]} za ${daysToMon===1?"1 den":daysToMon+" dní"} (pondělí 00:00)`;
-      }
-    }
-    if(nextMsg){
+    const chg=nextShiftChange(now2);
+    if(chg){
+      const w=chg.when;
+      const dnyMap=["neděle","pondělí","úterý","středa","čtvrtek","pátek","sobota"];
+      const denName=dnyMap[w.getDay()];
+      const cas=String(w.getHours()).padStart(2,"0")+":"+String(w.getMinutes()).padStart(2,"0");
+      // kolik dní (kalendářně) do změny
+      const d0=new Date(now2);d0.setHours(0,0,0,0);
+      const d1=new Date(w);d1.setHours(0,0,0,0);
+      const dnu=Math.round((d1-d0)/(24*3600*1000));
+      const kdy=dnu===0?"dnes":dnu===1?"zítra":"za "+dnu+" dní";
+      const nextMsg=`⏭ Přepnutí na ${WEEK_LABELS[chg.to]} — ${kdy} (${denName} ${cas})`;
       const infoEl=div("",nextMsg);
-      infoEl.style.cssText="text-align:center;font-size:9px;font-weight:700;color:#374151;letter-spacing:.05em;padding:0 12px 10px;max-width:480px;margin:0 auto";
+      infoEl.style.cssText="text-align:center;font-size:9px;font-weight:700;color:#475569;letter-spacing:.05em;padding:0 12px 10px;max-width:480px;margin:0 auto";
       wrap.appendChild(infoEl);
     }
   }
@@ -683,7 +696,8 @@ function render(){
   if(!isActiveWeek){
     const aWrap=div("");aWrap.style.cssText="padding:0 12px 16px;max-width:480px;margin:0 auto";
     const aBtn=btn("","⚡ NASTAVIT JAKO AKTIVNÍ SMĚNU",()=>{
-      S.modal={type:"confirm",title:"Přepnout aktivní směnu",msg:`Přepnout aktivní směnu na ${WEEKS[S.week].label}?\n(Tím se manuálně resetuje kotva pro rotaci A→B→C)`,
+      S.modal={type:"confirm",title:"⚠️ Manuální přepnutí",
+        msg:`Přepnout na ${WEEKS[S.week].label}?\n\n⚠️ VAROVÁNÍ: Toto přepíše rotaci v localStorage a může způsobit nesoulad na jiných zařízeních.\n\nPro správné nastavení použij 🔧 INICIALIZACE ROTACE v Kodexu.`,
         onOk:()=>{
           S.activeWeek=S.week;
           if(["A","B","C"].includes(S.week)){
@@ -870,7 +884,7 @@ function renderNow(content,slots,currentIdx,locks,bioNow,isActiveWeek,nowStr){
 
 function renderDay(content,slots,currentIdx,bioNow){
   // Páteční Volno — v kartě Den také ořízni uzly před 20:00
-  const isVolnoPatekDay=(S.week==="V" && STORE.getItem("nos_volno_patek")==="1");
+  const isVolnoPatekDay=(S.week==="V" && (STORE.getItem("nos_volno_patek")==="1" || (S.activeWeek==="V" && (S.manualTime||S.now).getDay()===5)));
   if(isVolnoPatekDay){
     const startIdx=slots.findIndex(s=>s.id==="V_SWAP_NIGHT");
     if(startIdx>0)slots=slots.slice(startIdx);
@@ -1130,6 +1144,9 @@ function renderSupply(content,slots,bioNow,nowStr,isActiveWeek){
 function renderCodex(content){
   CODEX.forEach(c=>{const card=div("zion-codex-card");card.id="codex-"+c.id;card.style.setProperty("--codex-bg",c.bg);card.style.setProperty("--codex-border",c.border);card.style.setProperty("--codex-color",c.color);card.innerHTML=`<div class="codex-title">${c.icon} ${c.title}</div><div class="codex-text">${c.text}</div>`;content.appendChild(card)});
   WEEKS[S.week].schedule.filter(s=>s.why).forEach(s=>{const card=div("");card.id="codex-slot-"+s.id;card.style.cssText="padding:10px 12px;border-radius:10px;border:1px solid #0f172a;background:#070b15;margin-bottom:8px";card.innerHTML=`<div style="font-size:11px;font-weight:700;color:#f1f5f9;margin-bottom:4px">${s.label}</div><div style="font-size:11px;color:#64748b;line-height:1.5">${s.why}</div>`;content.appendChild(card)});
+  const b0=btn("","🔧 INICIALIZACE ROTACE",()=>{S.modal={type:"init_rotace"};render()});
+  b0.style.cssText="width:100%;padding:12px;border-radius:10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#f87171;font-size:11px;font-weight:900;margin-bottom:8px";
+  content.appendChild(b0);
   const b1=btn("","💾 ZÁLOHA DAT (Export)",()=>{S.modal={type:"export",data:JSON.stringify({logs:S.logs,skips:S.skips,foodSwaps:S.foodSwaps})};render()});b1.style.cssText="width:100%;padding:12px;border-radius:10px;background:#0f172a;border:1px solid #1e293b;color:#94a3b8;font-size:11px;font-weight:900;margin-bottom:8px";
   const b2=btn("","📂 NAHRÁT ZÁLOHU (Import)",()=>{S.modal={type:"import",inputVal:""};render()});b2.style.cssText=b1.style.cssText;
   const b3=btn("","📋 KOPÍROVAT KÓD APP",()=>{S.modal={type:"appcode"};render()});b3.style.cssText=b1.style.cssText;
@@ -1367,6 +1384,82 @@ function renderModal(wrap,slots){
     back.style.cssText="width:100%;padding:11px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";
     box.appendChild(back);
   // ── PATCHED: foodskip modal ──
+  }else if(m.type==="init_rotace"){
+    const ttl=div("","🔧 INICIALIZACE ROTACE");ttl.style.cssText="font-size:15px;font-weight:700;color:#f87171;margin-bottom:6px;text-align:center";
+    const sub=div("","Nastav JEDEN zdroj pravdy pro rotaci.\nVyber, jaká PRACOVNÍ směna je v TOMTO týdnu (Po–Pá).\nVíkend = automaticky Volno.\nVšechna zařízení musí zadat stejnou hodnotu.");
+    sub.style.cssText="font-size:11px;color:#64748b;text-align:center;margin-bottom:16px;line-height:1.6;white-space:pre-wrap";
+    box.appendChild(ttl);box.appendChild(sub);
+
+    // Který týden je tento? Předvyplň podle stávající kotvy (pokud je)
+    const now2=S.manualTime||S.now;
+    const curWork=(()=>{const rs=computeShift(now2);if(rs&&rs!=="V")return rs;
+      // pokud je teď Volno, zkus odhadnout z aktivní kotvy nebo dej A
+      const aIdx=parseInt(STORE.getItem("nos_rot_anchor_index"));
+      if(!isNaN(aIdx)){const mon=rotMondayOf(now2),aMon=rotMondayOf(new Date(parseInt(STORE.getItem("nos_rot_anchor_monday"))));const wd=Math.round((mon-aMon)/(7*24*3600*1000));return ["A","B","C"][((aIdx+wd)%3+3)%3];}
+      return "A";})();
+
+    const shiftLabel=div("","Pracovní směna v tomto týdnu:");shiftLabel.style.cssText="font-size:11px;font-weight:700;color:#94a3b8;margin-bottom:6px";
+    box.appendChild(shiftLabel);
+    const shiftRow=div("");shiftRow.style.cssText="display:flex;gap:6px;margin-bottom:16px";
+    let selectedWork=curWork;
+    const shiftBtns={};
+    [["A","Noční"],["B","Odpolední"],["C","Ranní"]].forEach(([k,lbl])=>{
+      const b=btn("",lbl,()=>{
+        selectedWork=k;
+        Object.entries(shiftBtns).forEach(([kk,bb])=>{
+          bb.style.cssText=`flex:1;padding:10px 4px;font-size:11px;font-weight:900;border-radius:9px;${kk===selectedWork?`background:rgba(${S.theme.rgb},.2);border:1px solid rgba(${S.theme.rgb},.5);color:#fff`:"background:#000;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5)"}`;
+        });
+      });
+      b.style.cssText=`flex:1;padding:10px 4px;font-size:11px;font-weight:900;border-radius:9px;${k===selectedWork?`background:rgba(${S.theme.rgb},.2);border:1px solid rgba(${S.theme.rgb},.5);color:#fff`:"background:#000;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5)"}`;
+      shiftBtns[k]=b;shiftRow.appendChild(b);
+    });
+    box.appendChild(shiftRow);
+
+    // Náhled co z toho vyjde dnes
+    const preview=div("");
+    const updPreview=()=>{
+      // dočasně spočítej co by vyšlo
+      const mon=rotMondayOf(now2);
+      const idx={A:0,B:1,C:2}[selectedWork];
+      // simulace computeShift s touto kotvou
+      const dow=now2.getDay(),mins=now2.getHours()*60+now2.getMinutes();
+      let todayShift;
+      if(selectedWork==="A"){todayShift=(dow>=1&&dow<=4)?"A":(dow===5?(mins<t2m("20:00")?"A":"V"):"V");}
+      else{todayShift=(dow>=1&&dow<=5)?selectedWork:"V";}
+      preview.textContent=`📍 Dnes (${["neděle","pondělí","úterý","středa","čtvrtek","pátek","sobota"][dow]}) → ${WEEK_LABELS[todayShift]}`;
+    };
+    preview.style.cssText="font-size:12px;font-weight:900;color:#34d399;text-align:center;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);padding:10px;border-radius:9px;margin-bottom:14px";
+    box.appendChild(preview);
+    // re-render preview na klik (přepíšeme handlery aby volaly updPreview)
+    Object.entries(shiftBtns).forEach(([k,b])=>{
+      const orig=b.onclick;
+      b.addEventListener("click",()=>{setTimeout(updPreview,0)});
+    });
+    updPreview();
+
+    const info=div("","⚠️ Přepíše kotvu rotace v localStorage.\nZadej stejnou směnu na všech zařízeních.");
+    info.style.cssText="font-size:10px;color:#f87171;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);padding:8px 10px;border-radius:8px;margin-bottom:14px;text-align:center;line-height:1.5;white-space:pre-wrap";
+    box.appendChild(info);
+
+    const row=div("");row.style.cssText="display:flex;gap:8px";
+    const cancel=btn("","Zpět",()=>{S.modal=null;render()});
+    cancel.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";
+    const ok=btn("","✓ INICIALIZOVAT",()=>{
+      const mon=rotMondayOf(now2); // pondělí tohoto týdne
+      const idx={A:0,B:1,C:2}[selectedWork];
+      STORE.setItem("nos_rot_anchor_monday",String(mon.getTime()));
+      STORE.setItem("nos_rot_anchor_index",String(idx));
+      // okamžitě dopočítej aktuální směnu
+      const rs=computeShift(now2)||selectedWork;
+      S.activeWeek=rs;S.week=rs;
+      STORE.setItem("nos_active_week",rs);STORE.setItem("nos_week",rs);
+      // páteční volno flag
+      if(rs==="V" && now2.getDay()===5)STORE.setItem("nos_volno_patek","1");
+      else STORE.removeItem("nos_volno_patek");
+      save();S.modal=null;render();
+    });
+    ok.style.cssText="flex:1;padding:12px;border-radius:10px;font-size:11px;font-weight:900;color:#f87171;background:rgba(239,68,68,.15);border:1px solid #7f1d1d";
+    row.appendChild(cancel);row.appendChild(ok);box.appendChild(row);
   }else if(m.type==="foodskip"){
     const ttl=div("","Vynechané jídlo");ttl.style.cssText="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:8px;text-align:center";
     const msg=div("",`${m.title} bylo vynecháno v ${m.time}.\nJídlo není zapsáno jako snězené a nezapočítává se do kalorií.`);msg.style.cssText="font-size:12px;color:#94a3b8;text-align:center;margin-bottom:20px;line-height:1.5;white-space:pre-wrap";
@@ -1411,7 +1504,16 @@ function renderModal(wrap,slots){
   ov.appendChild(box);wrap.appendChild(ov);
 }
 
-const _timer=setInterval(()=>{if(!S.manualTime&&!S.modal){S.now=new Date();render()}},5000);
+const _timer=setInterval(()=>{if(!S.manualTime&&!S.modal){S.now=new Date();syncRealShift();render()}},5000);
+// Přepočítej aktivní směnu podle deterministické pravdy (volá se z timeru)
+function syncRealShift(){
+  const rs=computeShift(S.now);
+  if(rs && rs!==S.activeWeek){
+    const old=S.activeWeek;
+    S.activeWeek=rs;STORE.setItem("nos_active_week",rs);
+    if(S.week===old){S.week=rs;STORE.setItem("nos_week",rs);}
+  }
+}
 window.addEventListener("pagehide",save);
 window.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")save()});
 S._scrollToCurrent=true;
