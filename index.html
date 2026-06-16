@@ -163,8 +163,8 @@ const WEEKS={
     {id:"A_TRANSIT_WORK", timeStart:"21:20",timeEnd:"22:00", label:"Odchod a Přesun",        type:"info",  tags:["INFO"],  supls:[],foods:[]},
     {id:"A_WORK_1",       timeStart:"22:00",timeEnd:"00:00", label:"PRÁCE (Začátek)",        type:"work",  tags:["ANCHOR"],supls:[],foods:[]}
   ]},
-  B:{label:"ODPOLEDNÍ SMĚNA",emoji:"🟧",resetTime:"02:00",schedule:[
-    {id:"B_SLEEP_2",      timeStart:"02:00",timeEnd:"10:00", label:"Spánek (Pokračování)",   type:"sleep", tags:["ANCHOR"],supls:[],foods:[]},
+  B:{label:"ODPOLEDNÍ SMĚNA",emoji:"🟧",resetTime:"06:00",schedule:[
+    {id:"B_SLEEP_2",      timeStart:"06:00",timeEnd:"10:00", label:"Spánek (Pokračování)",   type:"sleep", tags:["ANCHOR"],supls:[],foods:[]},
     {id:"B_WAKE",         timeStart:"10:00",timeEnd:"10:30", label:"Budíček + Taurin",       type:"supl",  tags:["FLEX"],  supls:[{name:"Taurin",qty:2}],foods:[]},
     {id:"B_SWAP_MORN",    timeStart:"10:30",timeEnd:"11:30", label:"Maso / Rýže 1/2",       type:"food",  tags:["SWAP"],  supls:[{name:"Ca+Mg+Zn",qty:1}],foods:[{name:"Maso/rýže 1/2",kcal:518}],reqAcid:true,why:MEAT_RICE_INFO},
     {id:"B_FAST_START",   timeStart:"11:30",timeEnd:"12:30", label:"Káva + Cigareta",        type:"info",  tags:["INFO"],  supls:[],foods:[]},
@@ -177,7 +177,7 @@ const WEEKS={
     {id:"B_COFFEE_NIGHT", timeStart:"23:00",timeEnd:"00:30", label:"Káva + Cigareta",        type:"info",  tags:["INFO"],  supls:[],foods:[]},
     {id:"B_SWAP_NIGHT",   timeStart:"00:30",timeEnd:"01:00", label:"Sýr + Slunečnice",       type:"food",  tags:["SWAP"],  supls:[{name:"D3+K2",qty:1}],foods:[{name:"Eidam 40% 90g",kcal:282},{name:"Slunečnice 40g",kcal:254,swappable:true,swapWith:{name:"Eidam 40% 100g",kcal:313}}],applyCalcium:true},
     {id:"B_PRE_SLEEP",    timeStart:"01:00",timeEnd:"01:30", label:"Před spaním + Taurin",   type:"supl",  tags:["FLEX"],  supls:[{name:"Taurin",qty:2}],foods:[]},
-    {id:"B_SLEEP_1",      timeStart:"01:30",timeEnd:"02:00", label:"Spánek (Začátek)",       type:"sleep", tags:["ANCHOR"],supls:[],foods:[]}
+    {id:"B_SLEEP_1",      timeStart:"01:30",timeEnd:"06:00", label:"Spánek (Začátek)",       type:"sleep", tags:["ANCHOR"],supls:[],foods:[]}
   ]},
   C:{label:"RANNÍ SMĚNA",emoji:"🟥",resetTime:"02:00",schedule:[
     {id:"C_SLEEP_2",      timeStart:"02:00",timeEnd:"04:30", label:"Spánek (Pokračování)",   type:"sleep", tags:["ANCHOR"],supls:[],foods:[]},
