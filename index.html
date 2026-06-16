@@ -331,7 +331,7 @@ const S={
   manualTime:null,expandedWhy:{},modal:null,now:new Date(),autoScroll:true,_dayView:"dnes",_nowView:"dnes"
 };
 
-(function(){
+function runCycleCheck(){
   const now=new Date();
   const realShift=computeShift(now); // deterministická pravda (null pokud kotva nenastavena)
 
@@ -342,23 +342,23 @@ const S={
   const cycleStartMin=t2m(resetTimeStr),nowMin=now.getHours()*60+now.getMinutes(),cd=new Date(now);
   if(nowMin<cycleStartMin)cd.setDate(cd.getDate()-1);
 
-  // Zjisti, jestli zrovna probíhá přechod Noční→Volno (data patří Noční)
+  // Zjisti den v týdnu (pro páteční Volno flag)
   const dow=now.getDay();
-  const leavingNoctní=(S.activeWeek==="A" && realShift==="V"); // byli jsme Noční, teď je Volno
 
   // cycleKey podle data cyklu
   const cycleKey=cd.toISOString().slice(0,10)+"_"+effShift;
+  const prevCycle=STORE.getItem("nos_last_cycle"); // formát "YYYY-MM-DD_SHIFT"
 
-  if(STORE.getItem("nos_last_cycle")!==cycleKey){
+  if(prevCycle!==cycleKey){
     const backupData=JSON.stringify({logs:S.logs,skips:S.skips,foodSwaps:S.foodSwaps});
     const hasData=Object.keys(S.logs).length>0||Object.keys(S.skips).length>0;
-    const todayStr=cd.toISOString().slice(0,10);
-    const alreadyBacked=STORE.getItem("nos_yesterday_date")===todayStr;
-    if(hasData && !alreadyBacked){
+    // Datum A směna ARCHIVOVANÝCH dat = z předchozího cyklu (ne dnešní!)
+    const prevDate=prevCycle?prevCycle.split("_")[0]:cd.toISOString().slice(0,10);
+    const prevShift=prevCycle?prevCycle.split("_")[1]:S.activeWeek;
+    if(hasData){
       STORE.setItem("nos_yesterday_data",backupData);
-      // Směna, ke které data patří: pokud opouštíme Noční, ulož jako "A"
-      STORE.setItem("nos_yesterday_week",leavingNoctní?"A":S.activeWeek);
-      STORE.setItem("nos_yesterday_date",todayStr);
+      STORE.setItem("nos_yesterday_week",prevShift);     // směna, ke které data patří
+      STORE.setItem("nos_yesterday_date",prevDate);      // skutečné datum těch dat
       try{fetch(CLOUD_WEBHOOK,{method:"POST",body:JSON.stringify({typ:"data",data:backupData}),mode:"no-cors"}).catch(()=>{})}catch(e){}
     }
     // Vyčisti den
@@ -379,7 +379,8 @@ const S={
     STORE.setItem("nos_active_week",realShift);
     if(S.week===old){S.week=realShift;STORE.setItem("nos_week",realShift);}
   }
-})();
+}
+runCycleCheck(); // spusť hned při startu
 
 function save(){
   STORE.setItem("nos_logs",JSON.stringify(S.logs));STORE.setItem("nos_skips",JSON.stringify(S.skips));STORE.setItem("nos_fswaps",JSON.stringify(S.foodSwaps));
@@ -1504,7 +1505,7 @@ function renderModal(wrap,slots){
   ov.appendChild(box);wrap.appendChild(ov);
 }
 
-const _timer=setInterval(()=>{if(!S.manualTime&&!S.modal){S.now=new Date();syncRealShift();render()}},5000);
+const _timer=setInterval(()=>{if(!S.manualTime&&!S.modal){S.now=new Date();runCycleCheck();render()}},5000);
 // Přepočítej aktivní směnu podle deterministické pravdy (volá se z timeru)
 function syncRealShift(){
   const rs=computeShift(S.now);
