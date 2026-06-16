@@ -227,6 +227,50 @@ const CODEX=[
 
 const WEEK_LABELS={A:"Noční",B:"Odpolední",C:"Ranní",V:"Volno"};
 
+// ── MANUÁL / PROVOZNÍ POKYNY (rozbalovací, postupně doplňovat) ──
+const MANUAL=[
+  {id:"rotace",icon:"🔄",title:"ROTACE SMĚN",body:[
+    "Směna se POČÍTÁ z kotvy (pondělí + index) a aktuálního data. Stejná kotva = stejná směna na všech zařízeních, nezávisle na tom, kdy app naposledy běžela.",
+    "Rotace: Noční → Odpolední → Ranní → znovu. Mezi každou pracovní směnou je víkend Volno.",
+    "Nástup nové směny: pondělí 00:00. Noční přechází na Volno v pátek ve 20:00 (okno 17:30 se ten den zablokuje)."
+  ]},
+  {id:"rozvrh",icon:"🗓️",title:"ROZVRH SMĚN (časy)",body:[
+    "NOČNÍ: pracovní noci. Fyzicky první noc začíná v neděli ve 22:00 a běží do pondělí 6:00, pak Po 22:00–Út 6:00, … poslední noc Čt 22:00–Pá 6:00.",
+    "V appce svítí Noční Po–Čt celý den a v pátek do 20:00, pak Volno. Víkend (So+Ne) = Volno.",
+    "Pozn.: i když noční práce začíná fyzicky v neděli ve 22:00, app drží neděli jako Volno a Noční naskočí až v pondělí 00:00. Uzel 00:00–06:00 = pokračování noční práce.",
+    "ODPOLEDNÍ: Po–Pá 14:00–22:00. So+Ne Volno.",
+    "RANNÍ: Po–Pá 6:00–14:00. So+Ne Volno."
+  ]},
+  {id:"init",icon:"🔧",title:"INICIALIZACE ROTACE",body:[
+    "Nastavuje kotvu rotace — vyber, jaká PRACOVNÍ směna je tento týden (Po–Pá). Víkend = automaticky Volno.",
+    "Na VŠECH zařízeních zadej stejnou hodnotu — tím budou ukazovat shodnou směnu.",
+    "Inicializace NEČISTÍ den, pokud neměníš směnu. Stejná směna + stejný den = nic se nemaže.",
+    "Pokud inicializací ZMĚNÍŠ směnu, app do pár sekund zazálohuje a vyčistí den.",
+    "Tlačítko NASTAVIT JAKO AKTIVNÍ SMĚNU (u náhledu jiné směny) přepíše rotaci ručně a může rozhodit shodu mezi zařízeními. Pro správné nastavení použij raději INICIALIZACE ROTACE."
+  ]},
+  {id:"reset",icon:"🚨",title:"RESET A ZÁLOHY DNE",body:[
+    "TOTÁLNÍ RESET PAMĚTI DNE: okamžitě SMAŽE všechny dnešní záznamy. NEZÁLOHUJE — nejdřív si udělej zálohu.",
+    "Přirozené překlopení (v čase resetTime směny): zazálohuje Včera a vyčistí Dnes automaticky.",
+    "Záloha při překlopení proběhne SAMA i když necháš app otevřenou — kontroluje se každých pár sekund, nemusíš reloadovat.",
+    "Záloha při překlopení jde i do cloudu (Google Sheets) a označí se správným datem a směnou předchozího dne.",
+    "Staré zálohy (pořízené před touto verzí) mají špatné datum a starý rozvrh — NEPOUŽÍVAT. Používej jen zálohy z nové verze."
+  ]},
+  {id:"resettime",icon:"⏰",title:"ZMĚNA ČASU PŘEKLOPENÍ (resetTime)",body:[
+    "Měň POUZE když je Dnes ČISTÉ (žádné zapsané suply ani jídla). Ověříš v Den / Suply — nic odškrtnuté, kalorie 0.",
+    "Bezpečné okno: PO přirozeném překlopení a PŘED prvním ranním zápisem. Spánek nic nezapisuje, takže na konec spánku čekat nemusíš.",
+    "Záloha data uchová, ale den NEVYČISTÍ. Mazání záloh v cloudu den také nevyčistí. Den čistí jen reset nebo přirozené překlopení.",
+    "Když máš rozdělaný den: záloha → reset dne → teprve pak změna času.",
+    "POZOR — resetTime = nejzazší čas, dokdy zpětně zapíšeš noční jídlo (např. sýr v 0:30). Teď je 6:00.",
+    "Kdyby ses někdy potřeboval k sýru dostat i v 7 nebo 8 ráno, posuň reset dál (klidně na 8:00 nebo 9:00 — pořád je rezerva do budíčku v 10:00).",
+    "Pod tuto hranici reset NEDÁVEJ, jinak ti noční okno zase uteče do včerejška."
+  ]},
+  {id:"zarizeni",icon:"📱",title:"VÍCE ZAŘÍZENÍ",body:[
+    "Data jsou uložená lokálně v každém zařízení a prohlížeči zvlášť (localStorage). Nesdílí se sama mezi sebou.",
+    "Aby všechna zařízení ukazovala shodnou směnu, zadej na každém stejnou kotvu přes INICIALIZACE ROTACE.",
+    "Různé domény (např. Netlify vs GitHub) = různá data. Sjednotíš je jen stejnou inicializací na obou."
+  ]}
+];
+
 function t2m(t){if(!t)return 0;const[h,m]=t.split(":").map(Number);return h*60+m}
 function m2t(m){let x=Math.floor(m)%1440;if(x<0)x+=1440;return String(Math.floor(x/60)).padStart(2,"0")+":"+String(x%60).padStart(2,"0")}
 function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
@@ -1143,6 +1187,29 @@ function renderSupply(content,slots,bioNow,nowStr,isActiveWeek){
 }
 
 function renderCodex(content){
+  // ── MANUÁL / PROVOZNÍ POKYNY (rozbalovací) ──
+  if(!S.manualExpand)S.manualExpand={};
+  const manHead=btn("","📘 MANUÁL / PROVOZNÍ POKYNY   "+(S.manualOpen?"▲":"▼"),()=>{S.manualOpen=!S.manualOpen;render()});
+  manHead.style.cssText="width:100%;text-align:left;padding:14px;border-radius:12px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.4);color:#93c5fd;font-size:12px;font-weight:900;letter-spacing:.05em;margin-bottom:10px";
+  content.appendChild(manHead);
+  if(S.manualOpen){
+    const manWrap=div("");manWrap.style.cssText="margin-bottom:14px";
+    MANUAL.forEach(sec=>{
+      const open=!!S.manualExpand[sec.id];
+      const secBtn=btn("",sec.icon+"  "+sec.title+"   "+(open?"▲":"▼"),()=>{S.manualExpand[sec.id]=!S.manualExpand[sec.id];render()});
+      secBtn.style.cssText="width:100%;text-align:left;padding:11px 13px;border-radius:9px;background:#0f172a;border:1px solid #1e293b;color:#cbd5e1;font-size:11px;font-weight:900;margin-bottom:6px";
+      manWrap.appendChild(secBtn);
+      if(open){
+        const card=div("");card.style.cssText="background:#070b15;border:1px solid #0f172a;border-radius:9px;padding:11px 13px;margin:0 0 8px";
+        sec.body.forEach(line=>{
+          const p=div("","• "+line);p.style.cssText="font-size:10px;line-height:1.65;color:#9aa6b4;margin-bottom:8px";
+          card.appendChild(p);
+        });
+        manWrap.appendChild(card);
+      }
+    });
+    content.appendChild(manWrap);
+  }
   CODEX.forEach(c=>{const card=div("zion-codex-card");card.id="codex-"+c.id;card.style.setProperty("--codex-bg",c.bg);card.style.setProperty("--codex-border",c.border);card.style.setProperty("--codex-color",c.color);card.innerHTML=`<div class="codex-title">${c.icon} ${c.title}</div><div class="codex-text">${c.text}</div>`;content.appendChild(card)});
   WEEKS[S.week].schedule.filter(s=>s.why).forEach(s=>{const card=div("");card.id="codex-slot-"+s.id;card.style.cssText="padding:10px 12px;border-radius:10px;border:1px solid #0f172a;background:#070b15;margin-bottom:8px";card.innerHTML=`<div style="font-size:11px;font-weight:700;color:#f1f5f9;margin-bottom:4px">${s.label}</div><div style="font-size:11px;color:#64748b;line-height:1.5">${s.why}</div>`;content.appendChild(card)});
   const b0=btn("","🔧 INICIALIZACE ROTACE",()=>{S.modal={type:"init_rotace"};render()});
@@ -1155,7 +1222,18 @@ function renderCodex(content){
   b4.style.cssText="width:100%;padding:12px;border-radius:10px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.35);color:#60a5fa;font-size:11px;font-weight:900;margin-bottom:8px";
   const b5=btn("",(S.myColorsMode?"🎨 MY COLORS: ZAP":"🎨 MY COLORS: VYP")+" — Upravit barvy",()=>{S.modal={type:"mycolors"};render()});
   b5.style.cssText=`width:100%;padding:12px;border-radius:10px;background:rgba(${S.theme.rgb},.08);border:1px solid rgba(${S.theme.rgb},.3);color:${S.theme.hex};font-size:11px;font-weight:900;margin-bottom:8px`;
-  content.appendChild(b1);content.appendChild(b2);content.appendChild(b3);content.appendChild(b4);content.appendChild(b5);
+  content.appendChild(b1);
+  const noteExp=div("","⚠️ Než měníš čas překlopení dne (resetTime směny): Dnes musí být ČISTÉ (bez zápisů). Záloha data uchová, ale den nevyčistí — to udělá až reset dne nebo přirozené překlopení. Mazání záloh den NEvyčistí. Jinak hrozí rozpůlení dne mezi dvě definice.");
+  noteExp.style.cssText="font-size:9px;line-height:1.55;color:#fbbf24;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:9px;padding:9px 11px;margin-bottom:8px";
+  content.appendChild(noteExp);
+  content.appendChild(b2);content.appendChild(b3);content.appendChild(b4);content.appendChild(b5);
+  // ── Totální reset dne (stejná funkce jako v Suply) ──
+  const noteReset=div("","🚨 TOTÁLNÍ RESET PAMĚTI DNE — okamžitě SMAŽE všechny dnešní záznamy (zápisy, vynechání, záměny jídel). NEzálohuje! Nejdřív si udělej zálohu, pak teprve resetuj. Slouží k vyčištění dne před změnou času překlopení.");
+  noteReset.style.cssText="font-size:9px;line-height:1.55;color:#fca5a5;background:rgba(127,29,29,.12);border:1px solid rgba(127,29,29,.4);border-radius:9px;padding:9px 11px;margin:14px 0 8px";
+  content.appendChild(noteReset);
+  const bReset=btn("reset-danger","🚨 TOTÁLNÍ RESET PAMĚTI DNE",()=>{S.modal={type:"confirm",title:"Reset dne",msg:"Opravdu vymazat všechny dnešní záznamy?\n\n⚠️ Tato akce data NEZÁLOHUJE — pokud je chceš zachovat, nejdřív je zazálohuj.",onOk:()=>{S.logs={};S.skips={};S.foodSwaps={};save();S.modal=null;render()}};render()});
+  bReset.style.marginTop="0";
+  content.appendChild(bReset);
 }
 
 function renderModal(wrap,slots){
@@ -1272,11 +1350,14 @@ function renderModal(wrap,slots){
   }else if(m.type==="cloudsync"){
     const ttl=div("","☁️ CLOUD SYNC");ttl.style.cssText="font-size:15px;font-weight:700;color:#60a5fa;margin-bottom:6px;text-align:center";
     const sub=div("","Google Sheets · Záloha dat Nutri OS");sub.style.cssText="font-size:10px;color:#475569;text-align:center;margin-bottom:18px;letter-spacing:.05em";
-    box.appendChild(ttl);box.appendChild(sub);
     const btnData=btn("","📤 Odeslat zálohu dat",()=>{
       S.modal={type:"cloud_sending",typ:"data",payload:JSON.stringify({logs:S.logs,skips:S.skips,foodSwaps:S.foodSwaps})};render();
     });
     btnData.style.cssText="width:100%;padding:13px;border-radius:12px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.35);color:#34d399;font-size:12px;font-weight:900;margin-bottom:10px";
+    box.appendChild(ttl);box.appendChild(sub);box.appendChild(btnData);
+    const noteData=div("","⚠️ Než měníš čas překlopení dne (resetTime směny): Dnes musí být ČISTÉ (bez zápisů). Záloha data uchová, ale den nevyčistí — to udělá až reset dne nebo přirozené překlopení. Mazání záloh v cloudu den NEvyčistí. Jinak hrozí rozpůlení dne mezi dvě definice.");
+    noteData.style.cssText="font-size:9px;line-height:1.55;color:#fbbf24;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:9px;padding:9px 11px;margin-bottom:12px";
+    box.appendChild(noteData);
     const btnCode=btn("","📤 Odeslat kód aplikace",()=>{
       S.modal={type:"cloud_sending",typ:"appcode",payload:"<!DOCTYPE html>\n"+document.documentElement.outerHTML};render();
     });
@@ -1287,7 +1368,7 @@ function renderModal(wrap,slots){
     btnDown.style.cssText="width:100%;padding:13px;border-radius:12px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.35);color:#60a5fa;font-size:12px;font-weight:900;margin-bottom:14px";
     const close=btn("","Zavřít",()=>{S.modal=null;render()});
     close.style.cssText="width:100%;padding:11px;border-radius:10px;font-size:11px;font-weight:700;color:#64748b;background:#0f172a;border:1px solid #1e293b";
-    box.appendChild(btnData);box.appendChild(btnCode);box.appendChild(btnDown);box.appendChild(close);
+    box.appendChild(btnCode);box.appendChild(btnDown);box.appendChild(close);
 
   }else if(m.type==="cloud_sending"){
     const ttl=div("","📤 Odesílám do cloudu...");ttl.style.cssText="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:8px;text-align:center";
