@@ -134,7 +134,7 @@ body::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events
 <script>
 "use strict";
 const SUPL_COLORS={"Taurin":"#f97316","Ca+Mg+Zn":"#3b82f6","D3+K2":"#eab308","Mg+B6":"#22c55e"};
-const APP_VERSION="NUTRI OS V5.5";
+const APP_VERSION="NUTRI OS V5.6";
 const TAURIN_FAST_MIN=45,CALCIUM_LOCK_MIN=150,WHEY_LOCK_MIN=45,MEAT_TO_CHEESE_MIN=90,MEAT_TO_EMPTY_SUPL_MIN=120;
 const THEMES=[
   {id:"blue",  hex:"#3b82f6", rgb:"59,130,246",  bg:"#030712", bgRgb:"3,7,18",    panel:"rgba(59,130,246,.09)"},
@@ -451,6 +451,16 @@ function runCycleCheck(){
 runCycleCheck(); // spusť hned při startu
 
 function save(){
+  // ── Sleduj POSLEDNÍ SKUTEČNÝ ZÁPIS (nepřebijí ho prázdné dny) ──
+  try{
+    if(Object.keys(S.logs).length>0||Object.keys(S.skips).length>0){
+      const n=S.manualTime||S.now||new Date();
+      const pad=x=>String(x).padStart(2,"0");
+      STORE.setItem("nos_last_write",
+        n.getFullYear()+"-"+pad(n.getMonth()+1)+"-"+pad(n.getDate())+" "+pad(n.getHours())+":"+pad(n.getMinutes()));
+      STORE.setItem("nos_last_write_week",S.activeWeek);
+    }
+  }catch(e){}
   STORE.setItem("nos_logs",JSON.stringify(S.logs));STORE.setItem("nos_skips",JSON.stringify(S.skips));STORE.setItem("nos_fswaps",JSON.stringify(S.foodSwaps));
   STORE.setItem("nos_week",S.week);STORE.setItem("nos_active_week",S.activeWeek);STORE.setItem("nos_theme",S.theme.id);
   STORE.setItem("nos_intensity",String(S.intensity));
@@ -645,6 +655,27 @@ function guardActive(fn){const e=computeEngine();if(!e.isActiveWeek){S.modal={ty
 
 // Popisek pro archivní snímek: "Včera" jen když je opravdu z včerejška,
 // jinak "Poslední (datum)" — ať popisek nelže po prázdných/vynechaných dnech.
+// Řádek "Poslední zápis proběhl…" — vkládá se pod přepínač Dnes/Poslední
+function appendLastWriteLine(container){
+  const lw=STORE.getItem("nos_last_write");
+  if(!lw)return;
+  const lwWeek=STORE.getItem("nos_last_write_week");
+  const now=S.manualTime||S.now;
+  // Rozdíl v kalendářních dnech
+  const d0=new Date(now);d0.setHours(0,0,0,0);
+  const d1=new Date(lw.slice(0,10)+"T00:00:00");
+  const dnu=Math.round((d0-d1)/(24*3600*1000));
+  let kdy;
+  if(dnu<=0)kdy="dnes";
+  else if(dnu===1)kdy="včera";
+  else if(dnu<5)kdy="před "+dnu+" dny";
+  else kdy="před "+dnu+" dny";
+  const shift=lwWeek&&WEEK_LABELS[lwWeek]?" · "+WEEK_LABELS[lwWeek]:"";
+  const line=div("","✍ Poslední zápis: "+lw+"  ("+kdy+")"+shift);
+  line.style.cssText="text-align:center;font-size:9px;font-weight:700;color:#475569;letter-spacing:.04em;margin:-4px 0 12px";
+  container.appendChild(line);
+}
+
 function yesterdayLabel(){
   const d=STORE.getItem("nos_yesterday_date");
   if(!d)return "Včera";
@@ -831,6 +862,7 @@ function renderNow(content,slots,currentIdx,locks,bioNow,isActiveWeek,nowStr){
   bVcera.style.cssText=`flex:1;padding:7px;border-radius:9px;font-size:11px;font-weight:900;${!isDnes?`background:rgba(${S.theme.rgb},.18);border:1px solid rgba(${S.theme.rgb},.45);color:#fff`:"background:#000;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7)"}`;
   togRow.appendChild(bDnes);togRow.appendChild(bVcera);
   content.appendChild(togRow);
+  appendLastWriteLine(content);
 
   if(!isDnes){
     if(!yesterdayData){
@@ -981,6 +1013,7 @@ function renderDay(content,slots,currentIdx,bioNow){
   btnVcera.style.cssText=`flex:1;padding:8px;border-radius:9px;font-size:11px;font-weight:900;${!isDnes?`background:rgba(${S.theme.rgb},.18);border:1px solid rgba(${S.theme.rgb},.45);color:#fff`:"background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4)"}`;
   togWrap.appendChild(btnDnes);togWrap.appendChild(btnVcera);
   content.appendChild(togWrap);
+  appendLastWriteLine(content);
 
   if(!isDnes){
     if(!yesterdayData){
@@ -1620,6 +1653,20 @@ function renderModal(wrap,slots){
   }
   ov.appendChild(box);wrap.appendChild(ov);
 }
+
+// Jednorázové doplnění: když ještě nemáme "poslední zápis", odvoď ho z archivu
+(function seedLastWrite(){
+  try{
+    if(STORE.getItem("nos_last_write"))return;
+    const yd=STORE.getItem("nos_yesterday_data"),ydDate=STORE.getItem("nos_yesterday_date");
+    if(!yd||!ydDate)return;
+    const p=JSON.parse(yd);
+    const has=(p.logs&&Object.keys(p.logs).length>0)||(p.skips&&Object.keys(p.skips).length>0);
+    if(!has)return;
+    STORE.setItem("nos_last_write",ydDate+" (archiv)");
+    const w=STORE.getItem("nos_yesterday_week");if(w)STORE.setItem("nos_last_write_week",w);
+  }catch(e){}
+})();
 
 const _timer=setInterval(()=>{if(!S.manualTime&&!S.modal){S.now=new Date();runCycleCheck();render()}},5000);
 // Přepočítej aktivní směnu podle deterministické pravdy (volá se z timeru)
