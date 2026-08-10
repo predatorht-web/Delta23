@@ -355,11 +355,20 @@ function computeShift(date){
 function nextShiftChange(fromDate){
   const cur=computeShift(fromDate);
   if(cur===null)return null;
-  const start=new Date(fromDate);
-  for(let step=1;step<=8*24*60;step+=15){ // hledej po 15 min až 8 dní dopředu
+  // Zarovnej start na celou minutu (bez sekund), ať výsledek nevychází na 20:02
+  const start=new Date(fromDate);start.setSeconds(0,0);
+  for(let step=15;step<=8*24*60;step+=15){ // hrubé hledání po 15 min, až 8 dní dopředu
     const t=new Date(start.getTime()+step*60000);
     const s=computeShift(t);
-    if(s!==cur)return {from:cur,to:s,when:t};
+    if(s!==cur){
+      // Zjemni zpět po 1 minutě — najdi PRVNÍ minutu, kdy změna nastala
+      for(let back=step-14;back<=step;back++){
+        const t2=new Date(start.getTime()+back*60000);
+        const s2=computeShift(t2);
+        if(s2!==cur)return {from:cur,to:s2,when:t2};
+      }
+      return {from:cur,to:s,when:t};
+    }
   }
   return null;
 }
@@ -396,14 +405,29 @@ function runCycleCheck(){
   if(prevCycle!==cycleKey){
     const backupData=JSON.stringify({logs:S.logs,skips:S.skips,foodSwaps:S.foodSwaps});
     const hasData=Object.keys(S.logs).length>0||Object.keys(S.skips).length>0;
-    // Datum A směna ARCHIVOVANÝCH dat = z předchozího cyklu (ne dnešní!)
+    // Datum ARCHIVOVANÝCH dat = z předchozího cyklu (ne dnešní!)
     const prevDate=prevCycle?prevCycle.split("_")[0]:cd.toISOString().slice(0,10);
-    const prevShift=prevCycle?prevCycle.split("_")[1]:S.activeWeek;
-    if(hasData){
+    // Směna archivu: NEspoléhej na uložený zápis (mohl vzniknout bez kotvy).
+    // 1) Když data existují, vezmi písmeno z klíčů — ta data pod ním byla zapsána.
+    // 2) Jinak dopočítej deterministicky z kotvy pro to datum (poledne = reprezentativní).
+    let prevShift=null;
+    const logKeys=Object.keys(S.logs).concat(Object.keys(S.skips));
+    if(logKeys.length){
+      const pfx=logKeys[0].split("_")[0];
+      if(["A","B","C","V"].includes(pfx))prevShift=pfx;
+    }
+    if(!prevShift)prevShift=computeShift(new Date(prevDate+"T12:00:00"));
+    if(!prevShift)prevShift=prevCycle?prevCycle.split("_")[1]:S.activeWeek;
+    if(prevCycle){
+      // Snímek Včera se přepisuje VŽDY (i když byl den prázdný) — jinak by tam
+      // po prázdných dnech visel starý datum měsíce zpátky.
       STORE.setItem("nos_yesterday_data",backupData);
       STORE.setItem("nos_yesterday_week",prevShift);     // směna, ke které data patří
       STORE.setItem("nos_yesterday_date",prevDate);      // skutečné datum těch dat
-      try{fetch(CLOUD_WEBHOOK,{method:"POST",body:JSON.stringify({typ:"data",data:backupData}),mode:"no-cors"}).catch(()=>{})}catch(e){}
+      // Do cloudu posílej jen když je co posílat
+      if(hasData){
+        try{fetch(CLOUD_WEBHOOK,{method:"POST",body:JSON.stringify({typ:"data",data:backupData}),mode:"no-cors"}).catch(()=>{})}catch(e){}
+      }
     }
     // Vyčisti den
     S.logs={};S.skips={};S.foodSwaps={};
@@ -619,6 +643,17 @@ function computeEngine(){
 function findCurrent(slots,bioNow){let i=-1;for(let j=0;j<slots.length;j++){if(bioNow>=slots[j].absBase&&bioNow<slots[j].endTime){i=j;break}}if(i===-1&&slots.length&&bioNow>=slots[slots.length-1].endTime)i=slots.length-1;return i}
 function guardActive(fn){const e=computeEngine();if(!e.isActiveWeek){S.modal={type:"alert",title:"Náhledový režim",msg:"Nejdřív nastavte tuto směnu jako aktivní (tlačítkem nahoře)."};render();return}fn(e)}
 
+// Popisek pro archivní snímek: "Včera" jen když je opravdu z včerejška,
+// jinak "Poslední (datum)" — ať popisek nelže po prázdných/vynechaných dnech.
+function yesterdayLabel(){
+  const d=STORE.getItem("nos_yesterday_date");
+  if(!d)return "Včera";
+  const now=S.manualTime||S.now;
+  const y=new Date(now);y.setDate(y.getDate()-1);
+  const yStr=y.getFullYear()+"-"+String(y.getMonth()+1).padStart(2,"0")+"-"+String(y.getDate()).padStart(2,"0");
+  return (d===yStr?"Včera (":"Poslední (")+d+")";
+}
+
 function render(){
   setCSS();
   const app=document.getElementById("app");app.innerHTML="";
@@ -791,7 +826,7 @@ function renderNow(content,slots,currentIdx,locks,bioNow,isActiveWeek,nowStr){
   const isDnes=S._nowView!=="vcera";
   const togRow=div("");togRow.style.cssText="display:flex;gap:6px;margin-bottom:12px";
   const bDnes=btn("","Dnes",()=>{S._nowView="dnes";render()});
-  const bVcera=btn("","Včera"+(yesterdayDate?" ("+yesterdayDate+")":""),()=>{S._nowView="vcera";render()});
+  const bVcera=btn("",yesterdayLabel(),()=>{S._nowView="vcera";render()});
   bDnes.style.cssText=`flex:1;padding:7px;border-radius:9px;font-size:11px;font-weight:900;${isDnes?`background:rgba(${S.theme.rgb},.18);border:1px solid rgba(${S.theme.rgb},.45);color:#fff`:"background:#000;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7)"}`;
   bVcera.style.cssText=`flex:1;padding:7px;border-radius:9px;font-size:11px;font-weight:900;${!isDnes?`background:rgba(${S.theme.rgb},.18);border:1px solid rgba(${S.theme.rgb},.45);color:#fff`:"background:#000;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7)"}`;
   togRow.appendChild(bDnes);togRow.appendChild(bVcera);
@@ -941,7 +976,7 @@ function renderDay(content,slots,currentIdx,bioNow){
   const togWrap=div("");togWrap.style.cssText="display:flex;gap:6px;margin-bottom:12px";
   const isDnes=S._dayView!=="vcera";
   const btnDnes=btn("","Dnes",()=>{S._dayView="dnes";render()});
-  const btnVcera=btn("","Včera"+(yesterdayDate?" ("+yesterdayDate+")":""),()=>{S._dayView="vcera";render()});
+  const btnVcera=btn("",yesterdayLabel(),()=>{S._dayView="vcera";render()});
   btnDnes.style.cssText=`flex:1;padding:8px;border-radius:9px;font-size:11px;font-weight:900;${isDnes?`background:rgba(${S.theme.rgb},.18);border:1px solid rgba(${S.theme.rgb},.45);color:#fff`:"background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4)"}`;
   btnVcera.style.cssText=`flex:1;padding:8px;border-radius:9px;font-size:11px;font-weight:900;${!isDnes?`background:rgba(${S.theme.rgb},.18);border:1px solid rgba(${S.theme.rgb},.45);color:#fff`:"background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4)"}`;
   togWrap.appendChild(btnDnes);togWrap.appendChild(btnVcera);
